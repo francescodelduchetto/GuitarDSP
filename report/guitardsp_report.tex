@@ -1,0 +1,43 @@
+\documentclass[12pt,a4paper]{report}
+%\usepackage[pdftex]{graphicx}
+\usepackage[hyphens]{url}
+\usepackage[bookmarks, colorlinks=false, pdfborder={0 0 0},
+	pdftitle={guitardsp Report}, pdfauthor={Francesco Del Duchetto},
+	pdfsubject={computer science}]{hyperref} %for creating links in the pdf version and other additional pdf attributes, no effect on the printed document
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+  {\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+\usepackage{mdwlist} %for compact lists
+%~ \usepackage{tikz} 
+\usepackage{tikz-uml} %for uml diagrams
+\usepackage[T1]{fontenc}
+\usepackage{alltt}
+\usepackage{enumitem}
+\renewcommand*{\familydefault}{\sfdefault}
+\renewcommand\texttt[1]{{\normalfont\fontfamily{cmsltt}\selectfont #1}}
+\begin{document}
+
+
+\renewcommand\bibname{References} %Renames "Bibliography" to "References" on ref page
+
+%include other pages
+\input{./title.tex}
+\input{./abstract.tex}
+
+\pagenumbering{roman} %numbering before main content starts
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic} %reset numbering to normal for the main content
+
+\input{./introduction.tex}
+\input{./work-done.tex}
+\input{./considerations.tex}
+\input{./future-work.tex}
+\input{./conclusion.tex}
+\input{./ref.tex}
+
+\end{document}

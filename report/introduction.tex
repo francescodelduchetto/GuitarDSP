@@ -1,0 +1,35 @@
+\chapter{Introduction}
+
+With the advent of the digital world the way in which the sound is
+managed has been revolutioned increasing the versatility and the
+capability of the audio effects.
+Now a guitarist doesn't have to spend a lot of money, buying pedals, to
+use the effects and find its own sound: there are on
+the market a lot of pedals that are able to emulate (pretty well) the
+most famous analog effects of the major manufacturers and that are more
+powerful than their corresponding analog.
+
+
+Digital
+effects allow to experiment new processing techniques creating new
+sounds that in the analog domain are impossible to obtain; also they
+guarantees more safety because the musician must not have to deal with
+cables and possible damages of the circuits.
+
+\vspace{0.2in}
+With this project I try to create an application that is able to process
+an audio stream with some DSP algorithm. It use the
+\texttt{Java Sound API}\cite{javasound}, particularly the package
+\texttt{javax.sound.sampled} to obtain the input and output lines from
+the system.\\
+It is equipped with a graphical interface developed using the \texttt{Swing}
+library.
+
+\vspace{0.2in}
+The ultimate aim of the project is to allow user to plug its guitar jack
+in the mic input of the pc and to start playing modifying the sound in
+real-time with the effects provided by the application. Now the
+application can process an input stream given from an audio file stored
+on the PC because the real-time functionality involve in many
+difficulties, such as noise and latency, that due for time I have not
+yet been able to overcome. 

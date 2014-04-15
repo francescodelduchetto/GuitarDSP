@@ -1,0 +1,465 @@
+\chapter{Work Done}
+
+\section{Application design}  %-----------------> Application design
+In this stage of the work was designed the structure of the application,
+studying the best way to organize the entities and the operations
+between them.
+
+
+The global operation is based on the \texttt{Model-View-Controller}
+pattern that indicates the guidelines to write a good GUI-based
+application. This pattern is very useful because it helps the programmer
+to write highly reusable and extensible code when he has to work with
+a user interface. Its philosophy is to split the general operation into
+three parts: the management of the graphical interface (\texttt{View}), the
+management of data and functionalities (\texttt{Model}) and the
+communications between the \texttt{View} and the \texttt{Model}
+(\texttt{Controller}).
+
+\vspace{0.2in}
+
+The application is composed by the following packages:
+\begin{description}[noitemsep]
+  \item[Main:] contains only the main class that launches the
+    application.
+  \item[View:] contains the classes that compose the user
+    interface.
+  \item[Model:] contains the classes that manage the internal
+    operation, namely the streaming and processing of the sound.
+  \item[Controller:] contains a class that translates user
+    interactions with the \texttt{View} to commands for the \texttt{Model}, and also it
+    modifies the user interface according to signals from the \texttt{Model}.
+  \item[Effects:] contains the effects that implement the DSP
+    algorithms to modify the input signal.
+\end{description}
+
+\newpage
+Below there's a simple diagram that broadly shows how conceptually the
+application works with the packages:
+
+\tikzumlset{fill package=blue!10, font=\footnotesize}
+\begin{center}
+  \begin{tikzpicture}
+    \begin{umlpackage}[x=8]{Main}
+    \end{umlpackage}
+    \begin{umlpackage}[x=4, y=-2]{Controller}
+    \end{umlpackage}
+    \begin{umlpackage}[y=-4]{View}
+    \end{umlpackage}
+    \begin{umlpackage}[x=8, y=-4]{Model}
+    \end{umlpackage}
+    \begin{umlpackage}[x=4, y=-6]{Effects}
+    \end{umlpackage}
+    \umluniassoc{Main}{Controller}
+    \umluniassoc{Main}{Controller}
+    \umluniassoc{View}{Controller}
+    \umluniassoc{Controller}{View}
+    \umluniassoc{Model}{Controller}
+    \umluniassoc{Controller}{Model}
+    \umluniassoc{Model}{Effects}
+    \umluniassoc{Model}{Effects}
+  \end{tikzpicture}
+\end{center}
+
+\texttt{Main} starts \texttt{Controller} which shows
+the \texttt{View} and initializes the \texttt{Model}. User
+interactions are delivered from \texttt{View} to
+\texttt{Model} and vice versa by \texttt{Controller}. The
+\texttt{Model} uses \texttt{Effects} to modify the input.
+
+\newpage
+\subsection{MVC pattern}  %-----------------> MVC pattern
+
+As we said previously most of the entities of the application are
+grouped into the three packages that make up the \texttt{MVC} pattern.\\
+Below are shown these packages with the classes composing them.
+
+ %-----------------> View
+\vspace{0.2in}
+%~ \noindent
+\scalebox{0.9}{
+\begin{tikzpicture}
+  \begin{umlpackage}{View}
+    \umlclass[x=4, y=0]{View}{}{
+      \textbf{View(Controller)}\\
+      \textbf{registerObserver(ViewObserver)}: void\\
+      \textbf{getFileChooser()}: JFileChooser\\
+      \textbf{getFileNameTxt()}: JTextField\\
+      \textbf{getComponentIndex(Component)}: int\\
+      \textbf{createEffectPanel(Effect)}: void\\
+      \textbf{setComponentColor(Component, Color)}: void\\
+      \textbf{setStartStopButtonText(String)}: void }
+    \umlclass[x=-1, y=-4]{EffectPanel}{}{
+      \textbf{EffectPanel(ViewObserver, Effect)} }
+    \umlclass[x=6, y=-4]{WavFileFilter}{}{
+      \textbf{getDescription()}: String\\
+      \textbf{accept(File)}: boolean }
+    \umlclass[type=interface, x=2, y=-9]{ViewObserver}{}{
+      \textbf{getWindowListener()}: WindowListener\\
+      \textbf{getOpenButtonListener()}: ActionListener\\
+      \textbf{getAddButtonListener(JButton)}: ActionListener\\
+      \textbf{getStartStopButtonListener()}: ActionListener\\
+      \textbf{getInputParameterSldListener(}\\
+      \ \ \ \ \textbf{InputParameter<Number>,JSlider,JLabel)}:\\
+      \ \ \ \ ChangeListener\\
+      \textbf{getUpperSwitchBtnListener(JPanel)}: ActionListener\\
+      \textbf{getLowerSwitchBtnListener(JPanel)}: ActionListener\\
+      \textbf{getRemoveEffectBtnListener(JPanel)}: ActionListener\\
+      \textbf{getGraphBtnListener()}: ActionListener }
+    \umlclass[x=-2, y=-14]{GraphView}{}{
+      \textbf{GraphView()}\\
+      \textbf{repaint(short[])}: void }
+    \umlclass[x=5, y=-14]{GraphPanel}{}{
+      \textbf{GraphPanel()}\\
+      \textbf{paintComponent(Graphics)}: void }
+
+    \umlunicompo{View}{WavFileFilter}
+    \umlunicompo[anchor1=-110, anchor2=80]{View}{ViewObserver}
+    \umluniassoc[anchor1=-105, anchor2=73]{View}{ViewObserver}
+    \umlunicompo{GraphView}{GraphPanel}
+  \end{umlpackage}
+\end{tikzpicture} }
+
+\newpage
+\begin{description}
+  \item[View:] extends \texttt{JFrame}. It shows the
+    graphical interface on which the user can interact with the
+    application.\\
+    The \texttt{Controller}, to receive the user actions,
+    must implement the \texttt{ViewObserver} interface and must register
+    itself as an \texttt{Observer} of this class.
+  \item[EffectPanel:] extends \texttt{JPanel}. It
+    is the panel that is added when you click the button to add an
+    effect.
+    It allows the user to vary the parameters of the \texttt{Effect}
+    thus customizing the output sound.
+  \item[WavFileFilter:] extends \texttt{FileFilter}. It is used
+    by the \texttt{JFileChooser} to filter out, in the window that
+    allows user to select a file, the files that doesn't have the .wav
+    extension.
+  \item[ViewObserver:] it is an interface that must be
+    implemented by the \texttt{Controller}. Therefore the
+    \texttt{Controller} must provide the \texttt{Listeners} of the
+    \texttt{View}'s components.
+  \item[GraphView:] it shows the graph of the audio signal processed
+    with the \texttt{Effects}. It contains only a \texttt{GraphPanel}
+    that shows the signal.   
+    It refreshes the graph every time that the \texttt{repaint(short[])}
+    method is called, taking the new buffer that must be shown.
+  \item[GraphPanel:] it's the \texttt{JPanel} that contains the graph
+    of the signal. It draws the output signal according to the size of
+    the \texttt{JFrame} which can be resized by the user.
+    This function is made by overriding the \texttt{paintComponent(Graphics)}
+    method.
+\end{description}
+
+\newpage
+%-----------------> Model
+\noindent
+%~ \tikzumlset{font=\scriptsize}
+\begin{tikzpicture}
+  \begin{umlpackage}{Model}
+    \umlclass[x=0, y=1]{Model}{ }{
+      \textbf{Model(Controller)}\\
+      \textbf{getAvailableEffects()}: List<Class\\
+      \ \ \ \ <? extends Effect> >\\
+      \textbf{getEffects()}: List<Effect>\\
+      \textbf{addEffect(Effects)}: void\\
+      \textbf{removeEffect(int)}: void\\
+      \textbf{exchangeEffects(int, int)}: void\\
+      \textbf{getInputAttenuation()}:\\
+      \ \ \ \ InputParameter<Double>\\
+      \textbf{startStream(String)}: void\\
+      \textbf{stopStream()}: void }
+    \umlclass[x=3, y=-12]{Streamer}{}{
+      \textbf{Streamer(SourceDataLine, File,AudioFormat,}\\
+      \ \ \ \ \textbf{InputParameter<Double>, Controller, Model)}\\
+      \textbf{run()}: void\\
+      \textbf{stopStream()}: void }
+    \umlclass[x=7, y=0]{AudioSettings}{}{
+      \textbf{getAudioSettings()}: AudioSettings\\
+      \textbf{getAudioFormat()}: AudioFormat\\
+      \textbf{getBufferFrames()}: int\\
+      \textbf{getBufferLength()}: int\\
+      \textbf{getSampleRate()}: int\\
+      \textbf{getSampleSizeInBits()}: int\\
+      \textbf{getShortBufferLength()}: int\\
+      \textbf{getNumChannels()}: int\\
+      \textbf{getSigned()}: boolean\\
+      \textbf{getBigEndian()}: boolean\\ }
+    \umlclass[x=3.5, y=-6.5]{InputParameter<N>}{}{
+      \textbf{InputParameter(String, N, N, N)}\\
+      \textbf{getValue()}: N\\
+      \textbf{getMaxValue()}: N\\
+      \textbf{getMinValue()}: N\\
+      \textbf{getIntValue()}: int\\
+      \textbf{getIntMaxValue()}: int\\
+      \textbf{getIntMinValue()}: int\\
+      \textbf{getName()}: String\\
+      \textbf{setValue(N)}: void\\
+      \textbf{setIntValue(int)}: void }
+    \umlassoc[anchor1=110, anchor2=155]{Model}{Streamer}
+    \umluniassoc[geometry=|-,anchor1=160, anchor2=190]{Streamer}{InputParameter<N>}
+    \umluniassoc[geometry=|-, anchor1=240, anchor2=170]{Model}{InputParameter<N>}
+    \umluniassoc{Model}{AudioSettings}
+    \umluniassoc[anchor1=20]{Streamer}{AudioSettings}
+    \umluniassoc[angle1=70, angle2=110]{AudioSettings}{AudioSettings}
+  \end{umlpackage}
+\end{tikzpicture}
+
+\newpage
+\begin{description}
+  \item[Model:] it manages the whole operation of the application.
+    It is able to start a new \texttt{Streamer} and to stop it, also it
+    manages the \texttt{Effects} allowing the user to add, remove and exchange them. 
+  \item[Streamer:] extends \texttt{Thread}. When started
+    it creates a new thread which flows the audio from the input stream to
+    the output line applying the effects added by the user. Every time
+    it reads a new buffer from the input line it asks to the \texttt{Model}
+    the list of \texttt{Effects} that it must apply, allowing the user
+    to add, remove and exchange effects during the streaming of the file.
+    The \texttt{Streamer} also call the \texttt{updateGraph(short[])}
+    method of \texttt{Controller} every time that a new buffer is
+    processed, refreshing the graph.
+  \item[InputParameter<N>:] extends \texttt{Observable}. It %TODO
+    encapsulates the idea of parameter that can be varied at run-time 
+    modifying the state of an \texttt{Effect}. For example it is used
+    by the \texttt{OverdriveEffect} to allow the user to modify the
+    power of distortion.\\
+    It is a generic class where \texttt{N} must extends \texttt{Number}.
+    It provides however methods to access the value as \texttt{int}
+    number because the \texttt{JSlider}, which is used to vary its
+    value, works with \texttt{int} numbers.\\
+    It also notifies its \texttt{Observers} when its value is changed. 
+    An \texttt{Effect} can register itself as \texttt{Observer} of their
+    \texttt{InputParameters}.
+  \item[AudioSettings:] it follows the agreement of the
+    \texttt{Singleton} pattern, in fact its
+    constructor is private and the only existing instance can be taken
+    only by calling the \texttt{AudioSettings.getAudioSettings} method.\\
+    I chose to make it a \texttt{Singleton} pattern because there are no reasons
+    to have more than one instance of this class at the same time and
+    also to avoid having to pass its reference to every object that
+    needs it.\\
+    It provides methods to retrieve the audio technical information, such
+    as the frame size or the buffer length used.    
+\end{description}
+
+
+\newpage
+%-----------------> Controller
+%~ \noindent
+\begin{tikzpicture}
+  \begin{umlpackage}{Controller}
+    \umlclass[x=0, y=0]{Controller}{}{
+      \textbf{Controller()}\\
+      \textbf{showErrorDialog(String)}: void\\
+      \textbf{streamStarted()}: void \\
+      \textbf{streamStopped()}: void \\
+      \textbf{createGraphView()}: void \\
+      \textbf{updateGraph(short[])}: void \\
+      \textbf{getInputAttenuation()}: InputParameter<Double> \\
+      \textbf{getWindowListener()}: WindowListener \\
+      \textbf{getOpenButtonListener()}: ActionListener \\
+      \textbf{getAddButtonListener(JButton)}: ActionListener \\
+      \textbf{getStartStopButtonListener()}: ActionListener \\
+      \textbf{getPopupMenuItemListener(Class<Effect>)}: PopupMenuItemListener \\
+      \textbf{getInputParameterSldListener(InputParameter<Number>,}\\
+      \ \ \ \ \textbf{JSlider,JLabel)}: ChangeListener \\
+      \textbf{getUpperSwitchBtnListener(JPanel)}: ActionListener \\
+      \textbf{getLowerSwitchBtnListener(JPanel)}: ActionListener \\
+      \textbf{getRemoveEffectBtnListener(JPanel)}: ActionListener \\
+      \textbf{getGraphButtonListener()}: ActionListener }
+    \umlclass[x=0, y=-7]{PopupMenuItemListener}{}{
+      \textbf{PopupMenuItemListener(Class<Effect>)}\\
+      \textbf{actionPerformed(ActionEvent)}: void }
+    \umlunicompo{Controller}{PopupMenuItemListener}
+  \end{umlpackage}
+\end{tikzpicture}
+
+\begin{description}
+  \item[Controller:] its constructor creates a new \texttt{View}
+    and a new \texttt{Model} acting as a link between them. It
+    implements \texttt{ViewObserver} and therefore provides the
+    \texttt{Listeners} for the \texttt{View}.
+    It also supplies methods to allow the \texttt{Model} to report
+    when a stream is started or stopped and methods to create and to update
+    the \texttt{GraphView}.
+  \item[PopupMenuItemListener:] it handles the operations to do
+    when an item, contained in the pop-up that allows the user to
+    select an effect, is pressed. It says the \texttt{Model} to create
+    a new \texttt{Effect} and it says the View to add a new
+    \texttt{EffectPanel} for the \texttt{Effect} created.
+\end{description}
+
+%-----------------> Effects
+\subsection{Effects}
+%~ \noindent
+\scalebox{0.9}{
+\begin{tikzpicture}
+  \begin{umlpackage}{Effects}
+    \umlclass[type=interface, x=0, y=-6]{Effect}{}{
+      \textbf{process(short[], int)}: void\\
+      \textbf{initialize()}: void\\
+      \textbf{getInputParameters()}: List\\
+      \ \ \ \ <InputParameter\\
+      \ \ \ \ <? extends Number>> }
+    \umlclass[type=annotation, x=0, y=-1.5]{Attributes}{}{
+      \textbf{name()}: String\\
+      \textbf{isShowable()}: boolean }
+    \umlclass[x=8, y=-11]{ButterworthLPFilterEffect}{}{
+      \textbf{ButterworthLPFilterEffect()}\\
+      \textbf{process(short[],int)}:void\\
+      \textbf{getInputParameters()}:List<\\
+      \ \ \ \ InputParameters<\\
+      \ \ \ \ ? extends Numbers>>\\
+      \textbf{initialize()}:void\\
+      \textbf{update(Observable,Object)}: void }
+    \umlclass[x=0, y=-11]{OverdriveEffect}{}{
+      \textbf{OverdriveEffect()}\\
+      \textbf{process(short[],int)}:void\\
+      \textbf{getInputParameters()}:List<\\
+      \ \ \ \ InputParameters<\\
+      \ \ \ \ ? extends Numbers>>\\
+      \textbf{initialize()}:void\\
+      \textbf{update(Observable,Object)}: void }
+    \umlclass[x=8, y=-6.5]{ReverbEffect}{}{
+      \textbf{ReverbEffect()}\\
+      \textbf{process(short[],int)}:void\\
+      \textbf{getInputParameters()}:List<\\
+      \ \ \ \ InputParameters<\\
+      \ \ \ \ ? extends Numbers>>\\
+      \textbf{initialize()}:void\\
+      \textbf{update(Observable,Object)}:void }
+    \umlclass[x=7, y=-1.8]{FlangerEffect}{}{
+      \textbf{FlangerEffect()}\\
+      \textbf{process(short[],int)}:void\\
+      \textbf{getInputParameters()}:List<\\
+      \ \ \ \ InputParameters<\\
+      \ \ \ \ ? extends Numbers>>\\
+      \textbf{initialize()}:void\\
+      \textbf{update(Observable,Object)}:void }
+    \umlclass[x=0, y=3]{DelayEffect}{}{
+      \textbf{DelayEffect()}\\
+      \textbf{process(short[],int)}:void\\
+      \textbf{getInputParameters()}:List<\\
+      \ \ \ \ InputParameters<? extends Numbers>>\\
+      \textbf{initialize()}:void\\
+      \textbf{update(Observable,Object)}: void }
+    \umlclass[x=8, y=3]{DelayLine}{
+      \texttt{MAX\_DELAY\_LENGTH}:int }{
+      \textbf{DelayLine(}\\
+      \ \ \ \ \textbf{InputParameter<Integer>)}\\
+      \textbf{getResponse(short[],int)}:short[]\\
+      \textbf{getDelayLength()}:\\
+      \ \ \ \ InputParameters<Integer>\\
+      \textbf{getFeedback()}:\\
+      \ \ \ \ InputParameter<Double>\\
+      \textbf{emptyDelayBuffer()}:void }
+    \umlimpl{ButterworthLPFilterEffect}{Effect}
+    \umlimpl{FlangerEffect}{Effect}
+    \umlimpl[anchor1=-90, anchor2=70]{DelayEffect}{Effect}
+    \umlimpl{ReverbEffect}{Effect}
+    \umlimpl{OverdriveEffect}{Effect}
+    \umluniassoc{DelayEffect}{DelayLine}
+    \umluniassoc[geometry=-|-, arm1=-1cm, anchor1=-170, anchor2=170]{ReverbEffect}{ButterworthLPFilterEffect}
+    \umluniassoc{OverdriveEffect}{ButterworthLPFilterEffect}
+    \umluniassoc[anchor1=40, anchor2=-45]{ReverbEffect}{DelayLine}
+    \umlunicompo{Effect}{Attributes}
+    \end{umlpackage}
+\end{tikzpicture}
+}
+
+\newpage
+
+\begin{description}
+  \item[Effect:] it is an \texttt{Interface} that extends
+    \texttt{Observer} because it can register itself to receive a
+    notification by some of its \texttt{InputParameter}.\\
+    Each class that implement this interface must be able to:
+    \begin{itemize}
+      \item process a given buffer of shorts;
+      \item initialize itself resetting its environment;
+      \item return the \texttt{InputParameters} that the user can modify.
+    \end{itemize}
+  \item[Attributes:] it is an \texttt{Annotation} that stores
+    the name of the \texttt{Effect} and also it allows to know if it's
+    show-able to the user since some effects are for inner use and the
+    user can't use it directly.
+    This annotations is necessary because allows,
+    through \texttt{reflection}, to know which effects the user can
+    select before they are instantiated.\\
+    This \texttt{Annotation} allow, in the future, to add new
+    \texttt{Effects} without modifying the \texttt{View}.
+  \item[DelayLine:] it isn't an effect because it doesn't modifies
+    the original sound but it simply stores, in a circular buffer, an
+    infinite series of the given sounds according to these parameters:
+    \begin{description}
+      \item[Delay length:] it defines the length of the circular
+        buffer, changing the perception of the sound reflection's
+        distance.
+      \item[Feedback:] it defines the amount of the original
+        sound that must be stored. Its value can vary in the range $[0,1]$, 
+        if the value is $0$ the effect doesn't store any delay, if the value
+        is $1$ it stores the sound with the same volume as the original.
+    \end{description}
+    To get the dealy response associated to the original buffer
+    you must call \texttt{getResponse(originalBuffer, bufferLength)}.
+  \item[DelayEffect:] it is a simple effect that use a
+    \texttt{DelayLine} to perform an echo effect on the original sound.
+    It allows the user to modify the length of the delay and the gain value
+    of the echoes. \cite{comb}.
+  \item[FlangerEffect:] is an \texttt{Effect} that mixes the
+    original sound with a delayed copy of the original signal. The delay
+    time is continuously varied by a low frequency.\\
+    This effect doesn't use any delay lines because the \texttt{DelayLine}
+    keeps an infinite series of previously echoes while it needs only
+    the previous delayed sound.\cite{flanger}
+    The parameters that the user can modify are:
+    \begin{description}
+      \item[Frequency:] the frequency of the $\sin$ function that
+      continuously modify the delay length.
+      \item[Excursion:] the range in which the delay can vary.
+      \item[Depth:] modifies the percentage of delayed sound
+      over the original sound.
+    \end{description}
+  \item[ButterworthLPFilterEffect:] it's a low pass filter that
+    filters the frequencies above a given bound which can be varied by
+    the user\cite{butterworth}.
+    It isn't showable to the user, it's only used by the
+    \texttt{OverdriveEffect} and by the \texttt{ReverbEffect}.
+  \item[OverdriveEffect:] it applies a non-linear distortion
+    function to the original sound\cite{overdrive}. The ``sound'' of the
+    distortion is varied through two parameters:
+    \begin{description}
+      \item[Drive:] modifies the power of the distortion, if its
+        value is equal to $0$ the output sound is the same as the
+        original signal and higher is the value more the sound is
+        amplified and like a square wave.
+      \item[Cutoff:] manages the \texttt{ButterworthLPFilterEffect}
+        that cut the higher frequencies that in a real situation doesn't
+        occur and allows user to change the ``color'' of the distortion.
+    \end{description}
+    Using the \texttt{GraphView} we can clearly see the effect of these
+    two parameters on the original signal.
+  \item[ReverbEffect:] it simulates the echoes that occurs
+    for example in a church or in a concert hall. Often this effect is
+    added to a registration to make the sound less dry and more pleasant.\\
+    The algorithm implemented is based on the
+    \textit{Schroeder Reverberator}\cite{reverb} that suggest to apply
+    two stages of delay to the incoming sound:
+    \begin{description}
+      \item[Early reflections:] is implemented using some
+        delay lines chained in series. The delay lengths are very small
+        to increase the density of the audio impulses and different
+        from each other to make a good spatialization of the echoes.
+      \item[Late reflections:] is implemented using some delay
+        lines chained in parallel. Their delay lengths are longer than
+        the previous and varying them we can simulate the size of the
+        rooms in which the reverb occurs.\\
+        The late reflections are filtered with a
+        \texttt{ButterworthLPFilterEffect} to simulate the air
+        absorption of the high frequencies.
+    \end{description}
+  
+\end{description}

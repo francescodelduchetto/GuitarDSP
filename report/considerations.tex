@@ -1,0 +1,40 @@
+\chapter{Considerations}
+
+\section{Workflow}
+\begin{enumerate}
+  \item The design of the project started with a study of the Java
+  Sound API to understand how it works and how its tools could meet my
+  needs.
+  \item Then I designed an initial architecture of the entities starting
+  to write some code.
+  \item At this point I had to search some resources on the web that
+  helped me to understand how I actually had to implement the effects.
+\end{enumerate}
+
+\subsection{In-development changes}
+During the development of the project there was few changes from the
+initial intentions:
+\begin{enumerate}
+  \item I implemented the effects extending the abstract class
+    \texttt{Control} provided by the \texttt{javax.sound.sampled}
+    package which represents a control that the line requested can have but
+    then I choose to refactor the effects under the new interface
+    \texttt{Effect} to have more movement's freedom and
+    because conceptually, in my opinion, it is better a choice.
+  \item I had decided to make the \texttt{View} and the
+    \texttt{Model} unique using the \texttt{Singleton} pattern
+    but then I changed this setting to allow in the future to add some
+    of these if necessary.
+  \item I decided to remove the audio settings in the
+    \texttt{Model} refactoring them in the entity
+    \texttt{AudioSettings} in which I will be able to add, in the future,
+    the methods to modify these settings according to user's needs.
+  \item Lately I added the functionality that allows the user to see the
+    output audio signal in a graph.
+\end{enumerate}
+
+\section{Possible troubles}
+
+It is recommended not to use an overdrive effect before a delay
+or a reverb effect because the overdrive saturation, that is replicated
+many time by the delay, will overflow the buffers producing only noise.
