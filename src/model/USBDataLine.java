@@ -1,171 +1,241 @@
 package model;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Random;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.Control;
 import javax.sound.sampled.Control.Type;
+import javax.sound.sampled.Line;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
-public class USBDataLine implements TargetDataLine{
+public class USBDataLine implements TargetDataLine, SerialPortEventListener {
+	/** Milliseconds to block while waiting for port open */
+	private static final int TIME_OUT = 2000;
+	private static final Random deleteme = new Random();
 
-	private String serialPort;
+	/**
+	 * A BufferedReader which will be fed by a InputStreamReader converting the
+	 * bytes into characters making the displayed results codepage independent
+	 */
+	private BufferedReader input;
+	/** The output stream to the port */
+	private OutputStream output;
+
 	private AudioFormat audioFormat;
-	
-	public USBDataLine(String serialPort, AudioFormat audioFormat) {
-		this.serialPort = serialPort;
+	private boolean isOpen;
+	private byte[] buffer;
+	private int bufferSize;
+	private int bufferHead;
+	private int bufferTail;
+	private long framePosition;
+	private String portName;
+	private SerialPort serialPort;
+
+	private ArrayList<LineListener> listeners;
+
+	public USBDataLine(String portName, AudioFormat audioFormat) {
+		this.portName = portName;
 		this.audioFormat = audioFormat;
+		this.framePosition = 0;
+		this.bufferHead = 0;
+		this.bufferTail = 0;
 	}
-	
+
 	@Override
 	public int available() {
-		return 0;
+		if (this.isOpen()) {
+			if (bufferTail >= bufferHead) {
+				return bufferTail - bufferHead;
+			} else {
+				return bufferTail + bufferSize - bufferHead;
+			}
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
 	public void drain() {
-		// TODO Auto-generated method stub
-		
+		//
 	}
 
 	@Override
 	public void flush() {
-		// TODO Auto-generated method stub
-		
+		//
 	}
 
 	@Override
 	public int getBufferSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.bufferSize;
 	}
 
 	@Override
 	public AudioFormat getFormat() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.audioFormat;
 	}
 
 	@Override
 	public int getFramePosition() {
-		// TODO Auto-generated method stub
-		return 0;
+		// API says the result will wrap around 2^31
+		return (int) (this.framePosition % (1 << 31));
 	}
 
 	@Override
 	public float getLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override
 	public long getLongFramePosition() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.framePosition;
 	}
 
 	@Override
 	public long getMicrosecondPosition() {
-		// TODO Auto-generated method stub
-		return 0;
+		return (long) (this.framePosition * this.audioFormat.getFrameRate() * 1000);
 	}
 
 	@Override
 	public boolean isActive() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isRunning() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-		
+		//
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-		
+		//
 	}
 
 	@Override
-	public void addLineListener(LineListener arg0) {
-		// TODO Auto-generated method stub
-		
+	public void addLineListener(LineListener listener) {
+		this.listeners.add(listener);
 	}
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-		
+		//
 	}
 
 	@Override
 	public Control getControl(Type arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Control[] getControls() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public javax.sound.sampled.Line.Info getLineInfo() {
-		// TODO Auto-generated method stub
+	public Line.Info getLineInfo() {
 		return null;
 	}
 
 	@Override
 	public boolean isControlSupported(Type arg0) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.isOpen;
+	}
+
+	@Override
+	public void removeLineListener(LineListener listener) {
+		this.listeners.remove(listener);
 	}
 
 	@Override
 	public void open() throws LineUnavailableException {
-		// TODO Auto-generated method stub
-		
+		this.open(AudioSettings.getAudioSettings().getAudioFormat(),
+				AudioSettings.getAudioSettings().getBufferLength());
 	}
 
 	@Override
-	public void removeLineListener(LineListener arg0) {
-		// TODO Auto-generated method stub
-		
+	public void open(AudioFormat format) throws LineUnavailableException {
+		this.open(format, AudioSettings.getAudioSettings().getBufferLength());
 	}
 
 	@Override
-	public void open(AudioFormat arg0) throws LineUnavailableException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void open(AudioFormat arg0, int arg1)
+	public void open(AudioFormat format, int bufferSize)
 			throws LineUnavailableException {
-		// TODO Auto-generated method stub
-		
+		this.bufferSize = bufferSize;
+		this.buffer = new byte[bufferSize];
+
+		CommPortIdentifier portId = null;
+
+		try {
+			portId = CommPortIdentifier.getPortIdentifier(this.portName);
+			// open serial port, and use class name for the appName.
+			serialPort = (SerialPort) portId.open(this.getClass().getName(),
+					TIME_OUT);
+
+			// set port parameters
+			serialPort.setSerialPortParams(AudioSettings.getAudioSettings()
+					.getBitRate(), SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+
+			// open the streams
+			input = new BufferedReader(new InputStreamReader(
+					serialPort.getInputStream()));
+			output = serialPort.getOutputStream();
+
+			// add event listeners
+			serialPort.addEventListener(this);
+			serialPort.notifyOnDataAvailable(true);
+		} catch (Exception e) {
+			System.err.println(e.toString());
+		}
 	}
 
 	@Override
-	public int read(byte[] arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int read(byte[] b, int off, int len) {
+		int ret = 0;
+		for (int i = 0; i < len; i++) {
+			b[off + i] = (byte) deleteme.nextInt(100);
+			ret++;
+		}
+		return ret;
 	}
 
-	
+	@Override
+	public void serialEvent(SerialPortEvent event) {
+		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+			try {
+				String line = input.readLine();
+				System.out.println("DEBUG: " + line);
+				System.out.println("DEBUG: " + this.getBufferSize());
+				System.out.println("DEBUG: " + this.bufferHead);
+				for (char c: line.toCharArray()) {
+					this.buffer[this.bufferTail++] = (byte) c;
+				}
+			} catch (Exception e) {
+				System.err.println(e.toString());
+			}
+		} else if (event.getEventType() == SerialPortEvent.OUTPUT_BUFFER_EMPTY) {
+			// etc...
+		}
+	}
+
 }

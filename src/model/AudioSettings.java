@@ -80,6 +80,13 @@ public final class AudioSettings {
 	}
 
 	/**
+	 * @return
+	 */
+	public int getBitRate() {
+		return 9600;
+	}
+
+	/**
 	 * @return the number of frames in a buffer.
 	 */
 	public int getBufferFrames() {
