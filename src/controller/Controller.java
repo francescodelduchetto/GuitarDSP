@@ -106,7 +106,7 @@ public class Controller implements View.ViewObserver {
 	}
 
 	/**
-	 * Must be invoked when a {@link model.Streamer} starts to stream.
+	 * Must be invoked when a {@link model.OldStreamer} starts to stream.
 	 */
 	public final void streamStarted() {
 		isStreamRunning = true;
@@ -120,7 +120,7 @@ public class Controller implements View.ViewObserver {
 	}
 
 	/**
-	 * Must be invoked when a {@link model.Streamer} stops to stream.
+	 * Must be invoked when a {@link model.OldStreamer} stops to stream.
 	 */
 	public final void streamStopped() {
 		isStreamRunning = false;

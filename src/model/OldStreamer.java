@@ -25,7 +25,7 @@ import effects.Effect;
  * 
  * @author Francesco Del Duchetto
  */
-public class Streamer extends Thread {
+public class OldStreamer extends Thread {
 
 	/**
 	 * Input line.
@@ -81,7 +81,7 @@ public class Streamer extends Thread {
 	 * @param model
 	 *            the main model.
 	 */
-	public Streamer(final SourceDataLine lineOut, final File soundFile,
+	public OldStreamer(final SourceDataLine lineOut, final File soundFile,
 			final InputParameter<Double> attenuation,
 			final Controller controller, final Model model) {
 		this.soundFile = soundFile;

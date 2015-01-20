@@ -26,7 +26,7 @@ import effects.ReverbEffect;
  * line such as the length of the buffer or the sample rate.
  * 
  * <p>
- * It is able to start and stop a {@link Streamer} which acts the streaming of
+ * It is able to start and stop a {@link OldStreamer} which acts the streaming of
  * the audio input and applies the effects selected. The effects are also
  * managed by the {@code Model} that provide methods to add and remove an effect
  * and to exchange two effects.
@@ -65,7 +65,7 @@ public class Model {
 	/**
 	 * Instance of {@code Streamer}.
 	 */
-	private Streamer streamer;
+	private OldStreamer streamer;
 
 	/**
 	 * List of effects which are currently utilized.
@@ -163,7 +163,7 @@ public class Model {
 	}
 
 	/**
-	 * Starts a new {@link Streamer} which stream the file located at the given
+	 * Starts a new {@link OldStreamer} which stream the file located at the given
 	 * path.
 	 * 
 	 * @param fileSelected
@@ -171,14 +171,14 @@ public class Model {
 	 */
 	public final void startStream(final String fileSelected) {
 		if (fileSelected != null) {
-			streamer = new Streamer(lineOut, new File(fileSelected),
+			streamer = new OldStreamer(lineOut, new File(fileSelected),
 					inputAttenuation, controller, this);
 			streamer.start();
 		}
 	}
 
 	/**
-	 * Stop the running {@link Streamer} if there is one and reinitialize the
+	 * Stop the running {@link OldStreamer} if there is one and reinitialize the
 	 * effects.
 	 */
 	public final void stopStream() {
