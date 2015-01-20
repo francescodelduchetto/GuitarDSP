@@ -148,7 +148,7 @@ public class Controller implements View.ViewObserver {
 	 * @param currentBuffer
 	 *            the new audio buffer processed.
 	 */
-	public final void updateGraph(final short[] currentBuffer) {
+	public final void updateGraph(final byte[] currentBuffer) {
 		if (this.graphView != null) {
 			SwingUtilities.invokeLater(new Runnable() {
 

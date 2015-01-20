@@ -25,7 +25,7 @@ import effects.Effect;
  * 
  * @author Francesco Del Duchetto
  */
-public class OldStreamer extends Thread {
+public class ToRemove extends Thread {
 
 	/**
 	 * Input line.

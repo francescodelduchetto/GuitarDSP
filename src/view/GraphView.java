@@ -29,7 +29,7 @@ public class GraphView extends JFrame {
 	/**
 	 * The audio buffer that is shown.
 	 */
-	private short[] buffer;
+	private byte[] buffer;
 
 	/**
 	 * Create a new {@code GraphView} with a {@link GraphView} in it.
@@ -44,11 +44,11 @@ public class GraphView extends JFrame {
 	/**
 	 * Refresh the graph.
 	 * 
-	 * @param buffer
+	 * @param currentBuffer
 	 *            the new signal buffer that must be shown.
 	 */
-	public final void repaint(final short[] buffer) {
-		this.buffer = buffer;
+	public final void repaint(final byte[] currentBuffer) {
+		this.buffer = currentBuffer;
 		super.repaint();
 	}
 
