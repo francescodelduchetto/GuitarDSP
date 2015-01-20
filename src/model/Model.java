@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -63,9 +64,14 @@ public class Model {
 	private SourceDataLine lineOut;
 
 	/**
+	 * Input line.
+	 */
+	private AudioInputStream lineIn;
+
+	/**
 	 * Instance of {@code Streamer}.
 	 */
-	private OldStreamer streamer;
+	private Mixer mixer;
 
 	/**
 	 * List of effects which are currently utilized.
@@ -99,6 +105,11 @@ public class Model {
 			controller.showErrorDialog("Output line unavailable");
 		}
 		this.controller = controller;
+		try {
+			lineIn = new AudioInputStream(new USBDataLine("/dev/ttyUSB0", AudioSettings.getAudioSettings().getAudioFormat()));
+		} catch (Exception exception) {
+			controller.showErrorDialog("Input line unavailable");
+		}
 	}
 
 	/**
@@ -171,9 +182,9 @@ public class Model {
 	 */
 	public final void startStream(final String fileSelected) {
 		if (fileSelected != null) {
-			streamer = new OldStreamer(lineOut, new File(fileSelected),
+			this.mixer = new Mixer(lineOut, lineIn,
 					inputAttenuation, controller, this);
-			streamer.start();
+			this.mixer.start();
 		}
 	}
 
@@ -182,8 +193,8 @@ public class Model {
 	 * effects.
 	 */
 	public final void stopStream() {
-		if (streamer != null) {
-			streamer.stopStream();
+		if (mixer != null) {
+			mixer.stopStream();
 		}
 		for (Effect e : effectsList) {
 			e.initialize();
