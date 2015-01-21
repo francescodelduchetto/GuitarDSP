@@ -25,16 +25,20 @@ public final class AudioSettings {
 	 * The audio format used.
 	 */
 	private AudioFormat audioFormat;
-
-	/**
-	 * The number of samples per second.
-	 */
-	private static final int SAMPLE_RATE = 44100;
+	
+	private static final int BIT_RATE = 115200;
+	
+	private static final int AUDIO_SAMPLE_SIZE_BITS = 16;
 
 	/**
 	 * The size of the sample.
 	 */
-	private static final int SAMPLE_SIZE_BITS = 16;
+	private static final int SAMPLE_SIZE_BITS = 40;
+
+	/**
+	 * The number of samples per second.
+	 */
+	private static final int SAMPLE_RATE = BIT_RATE / SAMPLE_SIZE_BITS;
 
 	/**
 	 * The number of channels used.
@@ -61,7 +65,7 @@ public final class AudioSettings {
 	 * Creates a new {@code AudioSettings}.
 	 */
 	private AudioSettings() {
-		audioFormat = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE_BITS, CHANNELS,
+		audioFormat = new AudioFormat(SAMPLE_RATE, 16, CHANNELS,
 				SIGNED, BIG_ENDIAN);
 	}
 
@@ -83,7 +87,7 @@ public final class AudioSettings {
 	 * @return
 	 */
 	public int getBitRate() {
-		return 9600;
+		return BIT_RATE;
 	}
 
 	/**
@@ -97,7 +101,7 @@ public final class AudioSettings {
 	 * @return the length of the buffer in bytes.
 	 */
 	public int getBufferLength() {
-		return AudioSettings.BUFFER_FRAMES * SAMPLE_SIZE_BITS / 8;
+		return AudioSettings.BUFFER_FRAMES * AUDIO_SAMPLE_SIZE_BITS / 8;
 	}
 
 	/**
@@ -108,11 +112,19 @@ public final class AudioSettings {
 	}
 
 	/**
+	 * @return the audio sample size in bits.
+	 */
+	public int getAudioSampleSizeInBits() {
+		return AudioSettings.AUDIO_SAMPLE_SIZE_BITS;
+	}
+	
+	/**
 	 * @return the sample size in bits.
 	 */
 	public int getSampleSizeInBits() {
 		return AudioSettings.SAMPLE_SIZE_BITS;
 	}
+
 
 	/**
 	 * @return the length of the buffer in shorts.

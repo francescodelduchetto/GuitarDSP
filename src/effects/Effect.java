@@ -48,6 +48,8 @@ public interface Effect extends Observer {
 	 * @return the {@code List} of {@link InputParameter} that the effect uses.
 	 */
 	List<InputParameter<? extends Number>> getInputParameters();
+	
+	void touchpadEvent(int touchX, int touchY, int pressure);
 
 	/**
 	 * Annotation that specifies the name of the effect and if it's show-able on

@@ -239,4 +239,10 @@ public class ReverbEffect implements Effect {
 			}
 		}
 	}
+
+	@Override
+	public void touchpadEvent(int touchX, int touchY, int pressure) {
+		// TODO Auto-generated method stub
+		
+	}
 }

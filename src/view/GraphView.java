@@ -79,7 +79,7 @@ public class GraphView extends JFrame {
 			g.setColor(Color.RED);
 			if (buffer != null) {
 				double ax = (double) buffer.length / this.getSize().width;
-				double ay = (Short.MAX_VALUE - Short.MIN_VALUE)
+				double ay = (Byte.MAX_VALUE - Byte.MIN_VALUE)
 						/ (this.getSize().height - 3);
 				for (int i = 0; i < buffer.length - 1; i++) {
 					int x1 = (int) Math.round(i / ax);

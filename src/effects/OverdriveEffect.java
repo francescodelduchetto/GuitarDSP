@@ -85,4 +85,10 @@ public class OverdriveEffect implements Effect {
 	@Override
 	public void update(final Observable o, final Object arg) {
 	}
+
+	@Override
+	public void touchpadEvent(int touchX, int touchY, int pressure) {
+		// TODO Auto-generated method stub
+		
+	}
 }

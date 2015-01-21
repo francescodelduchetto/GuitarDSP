@@ -6,6 +6,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -56,11 +57,14 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	public int available() {
 		if (this.isOpen()) {
 			if (bufferTail >= bufferHead) {
+				System.out.println(bufferTail - bufferHead);
 				return bufferTail - bufferHead;
 			} else {
+				System.out.println(bufferTail + bufferSize - bufferHead);
 				return bufferTail + bufferSize - bufferHead;
 			}
 		} else {
+			System.out.println(0);
 			return 0;
 		}
 	}
@@ -169,17 +173,18 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	@Override
 	public void open() throws LineUnavailableException {
 		this.open(AudioSettings.getAudioSettings().getAudioFormat(),
-				AudioSettings.getAudioSettings().getBufferLength());
+				AudioSettings.getAudioSettings().getBufferLength()*10);
 	}
 
 	@Override
 	public void open(AudioFormat format) throws LineUnavailableException {
-		this.open(format, AudioSettings.getAudioSettings().getBufferLength());
+		this.open(format, AudioSettings.getAudioSettings().getBufferLength()*10);
 	}
 
 	@Override
 	public void open(AudioFormat format, int bufferSize)
 			throws LineUnavailableException {
+		this.isOpen = true;
 		this.bufferSize = bufferSize;
 		this.buffer = new byte[bufferSize];
 
@@ -213,7 +218,10 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	public int read(byte[] b, int off, int len) {
 		int ret = 0;
 		for (int i = 0; i < len; i++) {
-			b[off + i] = (byte) deleteme.nextInt(100);
+			b[off + i] = this.buffer[this.bufferHead++];
+			if (this.bufferHead == this.bufferSize) {
+				this.bufferHead = 0;
+			}
 			ret++;
 		}
 		return ret;
@@ -223,12 +231,21 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	public void serialEvent(SerialPortEvent event) {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
-				String line = input.readLine();
-				System.out.println("DEBUG: " + line);
-				System.out.println("DEBUG: " + this.getBufferSize());
-				System.out.println("DEBUG: " + this.bufferHead);
-				for (char c: line.toCharArray()) {
-					this.buffer[this.bufferTail++] = (byte) c;
+				int line = Integer.parseInt(input.readLine());
+				if (this.bufferTail % 32 == 0) {
+					System.out.println("DEBUG bufferTail: " + this.bufferTail);
+					System.out.println("DEBUG bufferHead: " + this.bufferHead);
+				}
+				byte[] bytes = new byte[]{
+					(byte) ((line) & (1 << 10)),
+					(byte) ((line >> 10) & (1 << 10)),
+					(byte) ((line >> 20) & (1 << 10))
+				};
+				for (byte b: bytes) {
+					this.buffer[this.bufferTail++] = b;
+					if (this.bufferTail == this.bufferSize) {
+						this.bufferTail = 0;
+					}
 				}
 			} catch (Exception e) {
 				System.err.println(e.toString());

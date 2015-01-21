@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.TargetDataLine;
 
 import controller.Controller;
 import effects.ButterworthLPFilterEffect;
@@ -106,7 +107,9 @@ public class Model {
 		}
 		this.controller = controller;
 		try {
-			lineIn = new AudioInputStream(new USBDataLine("/dev/ttyUSB0", AudioSettings.getAudioSettings().getAudioFormat()));
+			TargetDataLine usbLine = new USBDataLine("/dev/ttyUSB0", AudioSettings.getAudioSettings().getAudioFormat());
+			usbLine.open();
+			lineIn = new AudioInputStream(usbLine);
 		} catch (Exception exception) {
 			controller.showErrorDialog("Input line unavailable");
 		}
@@ -199,5 +202,9 @@ public class Model {
 		for (Effect e : effectsList) {
 			e.initialize();
 		}
+	}
+	
+	public Mixer getMixer() {
+		return this.mixer;
 	}
 }

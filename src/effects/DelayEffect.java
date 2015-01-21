@@ -83,4 +83,10 @@ public class DelayEffect implements Effect {
 	public final void update(final Observable o, final Object arg) {
 		delayLine.emptyDelayBuffer();
 	}
+
+	@Override
+	public void touchpadEvent(int touchX, int touchY, int pressure) {
+		// TODO Auto-generated method stub
+		
+	}
 }
