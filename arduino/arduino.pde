@@ -1,6 +1,6 @@
-// Touch screen library with X Y and Z (pressure) readings as well
-// as oversampling to avoid 'bouncing'
-// This demo code returns raw readings, public domain
+/*
+ * Arduino code for sending data (audio, touch_x, touch_y, touch_pressure)
+ */
 
 #include <stdint.h>
 #include "TouchScreen.h"
@@ -16,20 +16,33 @@
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop(void) {
   // a point object holds x y and z coordinates
   TSPoint p = ts.getPoint();
-  
+
+  uint16_t mask = (1 << 10) - 1;
+
+  uint16_t packed[4] = {
+    analogRead(A0) & mask,
+    p.x & mask,
+    p.y & mask,
+    p.z & mask
+  };
+
+  uint8_t bytes[5] = {
+    packed[0] >> 2,
+    ((packed[0] & ((1 << 2) - 1)) << 6) + (packed[1] >> 4),
+    ((packed[1] & ((1 << 4) - 1)) << 4) + (packed[2] >> 6),
+    ((packed[2] & ((1 << 6) - 1)) << 2) + (packed[3] >> 8),
+    packed[3] & ((1 << 8) - 1)
+  };
+
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
-  if (p.z > ts.pressureThreshhold) {
-     Serial.print("X = "); Serial.print(p.x);
-     Serial.print("\tY = "); Serial.print(p.y);
-     Serial.print("\tPressure = "); Serial.println(p.z);
-  }
-
-  delay(100);
+  //if (p.z > ts.pressureThreshhold) {
+     Serial.print(bytes, 5);
+  //}
 }
