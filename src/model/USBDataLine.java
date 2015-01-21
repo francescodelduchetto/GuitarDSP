@@ -5,9 +5,8 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Random;
@@ -26,10 +25,9 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	private static final Random deleteme = new Random();
 
 	/**
-	 * A BufferedReader which will be fed by a InputStreamReader converting the
-	 * bytes into characters making the displayed results codepage independent
+	 * 
 	 */
-	private BufferedReader input;
+	private InputStream input;
 	/** The output stream to the port */
 	private OutputStream output;
 
@@ -202,8 +200,7 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open the streams
-			input = new BufferedReader(new InputStreamReader(
-					serialPort.getInputStream()));
+			input = new BufferedInputStream(serialPort.getInputStream());
 			output = serialPort.getOutputStream();
 
 			// add event listeners
@@ -231,16 +228,12 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 	public void serialEvent(SerialPortEvent event) {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
-				int line = Integer.parseInt(input.readLine());
+				byte[] bytes = new byte[5];
+				input.read(bytes);
 				if (this.bufferTail % 32 == 0) {
 					System.out.println("DEBUG bufferTail: " + this.bufferTail);
 					System.out.println("DEBUG bufferHead: " + this.bufferHead);
 				}
-				byte[] bytes = new byte[]{
-					(byte) ((line) & (1 << 10)),
-					(byte) ((line >> 10) & (1 << 10)),
-					(byte) ((line >> 20) & (1 << 10))
-				};
 				for (byte b: bytes) {
 					this.buffer[this.bufferTail++] = b;
 					if (this.bufferTail == this.bufferSize) {

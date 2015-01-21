@@ -148,13 +148,14 @@ public class Controller implements View.ViewObserver {
 	 * @param currentBuffer
 	 *            the new audio buffer processed.
 	 */
-	public final void updateGraph(final byte[] currentBuffer) {
+	public final void updateGraph(final short newSample) {
+		
 		if (this.graphView != null) {
 			SwingUtilities.invokeLater(new Runnable() {
 
 				@Override
 				public void run() {
-					graphView.repaint(currentBuffer);
+					graphView.repaint(newSample);
 					graphView.revalidate();
 				}
 			});

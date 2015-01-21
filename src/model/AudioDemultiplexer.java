@@ -22,6 +22,8 @@ public class AudioDemultiplexer extends Thread {
 	public AudioDemultiplexer(AudioInputStream stream, Model model, Controller controller) {
 		this.stream = stream;
 		this.model = model;
+		this.controller = controller;
+		this.isStreamStopped = true;
 	}
 	
 	public void run() {
@@ -34,38 +36,38 @@ public class AudioDemultiplexer extends Thread {
 			if (stream != null) {
 				if (stream.available() >= buffer.length) 
 					bytesRead = stream.read(buffer, 0, buffer.length);
-			}
-			/* Apply attenuation */
-//				this.attenuate(audioBuffer);
-
-			for (int i = 0; i < 4; i++) {
-				int mask = (1 << (8 - 2 * i)) - 1;
-				int lshift = 2 * i;
-				int rshift = 8 - 2 * (i + 1);
-				unpack[i] = (short) ((buffer[i] & mask) << lshift + (buffer[i + 1] >> rshift));
+				System.out.println(bytesRead);
 			}
 			
-			
-			/* update mixer */
-			this.model.getMixer().audioEvent(unpack[0]);
-			
-			notifyEffects(unpack[1], unpack[2], unpack[3]);
-			
-			
-			/* Update the graph */
-			this.controller.updateGraph(audioBuffer);
-			
-//				for (int i=0; i<audioBuffer.length; i++) {
-//					System.out.println(audioBuffer[i]);
-//				}
-//				System.out.println("disponibili = " + this.lineIn.available());
-			
-
-			bytesRead = stream.read(audioBuffer, 0, audioBuffer.length);
-
+//			System.out.println(bytesRead);
+			while(bytesRead != -1 && !isStreamStopped) {
+				for (int i = 0; i < 4; i++) {
+					int mask = (1 << (8 - 2 * i)) - 1;
+					int lshift = 2 * i;
+					int rshift = 8 - 2 * (i + 1);
+					unpack[i] = (short) ((buffer[i] & mask) << lshift + (buffer[i + 1] >> rshift));
+				}
+				
+//				System.out.println(unpack[0]);
+				
+				/* update mixer */
+				this.model.getMixer().audioEvent(unpack[0]);
+				
+				notifyEffects(unpack[1], unpack[2], unpack[3]);
+				
+				/* Update the graph */
+				this.controller.updateGraph(unpack[0]);			
+	
+				bytesRead = stream.read(buffer, 0, buffer.length);
+			}
 		} catch (IOException exception) {
 			controller.showErrorDialog("Error accessing input line");
 		}
+	}
+	
+	public void startStream() {
+		this.isStreamStopped = false;
+		System.out.println("asd");
 	}
 	
 	public void stopStream() {

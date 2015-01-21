@@ -88,6 +88,8 @@ public class Model {
 	 * Contains the settings of the audio streaming.
 	 */
 	private AudioSettings audioSettings;
+	
+	private AudioDemultiplexer demultiplexer;
 
 	/**
 	 * Constructor of the {@code Model}.
@@ -113,6 +115,8 @@ public class Model {
 		} catch (Exception exception) {
 			controller.showErrorDialog("Input line unavailable");
 		}
+		this.demultiplexer = new AudioDemultiplexer(lineIn, this, this.controller);
+		this.demultiplexer.start();
 	}
 
 	/**
@@ -185,10 +189,10 @@ public class Model {
 	 */
 	public final void startStream(final String fileSelected) {
 		if (fileSelected != null) {
-			this.mixer = new Mixer(lineOut, lineIn,
-					inputAttenuation, controller, this);
-			this.mixer.start();
+			this.mixer = new Mixer(lineOut,
+					inputAttenuation, this);
 		}
+		this.demultiplexer.startStream();
 	}
 
 	/**
@@ -196,12 +200,10 @@ public class Model {
 	 * effects.
 	 */
 	public final void stopStream() {
-		if (mixer != null) {
-			mixer.stopStream();
-		}
 		for (Effect e : effectsList) {
 			e.initialize();
 		}
+		this.demultiplexer.stopStream();
 	}
 	
 	public Mixer getMixer() {
