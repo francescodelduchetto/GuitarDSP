@@ -256,7 +256,7 @@ public class Controller implements View.ViewObserver {
 				if (isStreamRunning) {
 					model.stopStream();
 				} else {
-					model.startStream(view.getFileNameText().getText());
+					model.startStream();
 				}
 			}
 		};

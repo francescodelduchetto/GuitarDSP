@@ -231,10 +231,12 @@ public class USBDataLine implements TargetDataLine, SerialPortEventListener {
 				byte[] bytes = new byte[5];
 				input.read(bytes);
 				if (this.bufferTail % 32 == 0) {
-					System.out.println("DEBUG bufferTail: " + this.bufferTail);
-					System.out.println("DEBUG bufferHead: " + this.bufferHead);
+//					System.out.println("DEBUG bufferTail: " + this.bufferTail);
+//					System.out.println("DEBUG bufferHead: " + this.bufferHead);
 				}
+				System.out.println("asd");
 				for (byte b: bytes) {
+				System.out.println("# " + b);
 					this.buffer[this.bufferTail++] = b;
 					if (this.bufferTail == this.bufferSize) {
 						this.bufferTail = 0;

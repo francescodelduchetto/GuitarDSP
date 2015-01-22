@@ -23,20 +23,28 @@ public class AudioDemultiplexer extends Thread {
 		this.stream = stream;
 		this.model = model;
 		this.controller = controller;
-		this.isStreamStopped = true;
+		this.isStreamStopped = false;
 	}
 	
-	public void run() {
+	@Override
+	public final void run() {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		short[] unpack = new short[4];
 		
 		int bytesRead = -1;
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		controller.streamStarted();
 		
 		try {
 			if (stream != null) {
 				if (stream.available() >= buffer.length) 
 					bytesRead = stream.read(buffer, 0, buffer.length);
-				System.out.println(bytesRead);
+				System.out.println("asd" + bytesRead);
 			}
 			
 //			System.out.println(bytesRead);
@@ -48,7 +56,10 @@ public class AudioDemultiplexer extends Thread {
 					unpack[i] = (short) ((buffer[i] & mask) << lshift + (buffer[i + 1] >> rshift));
 				}
 				
-//				System.out.println(unpack[0]);
+//				System.out.println("audio = " + unpack[0]);
+//				System.out.println("X = " + unpack[1]);
+//				System.out.println("Y = " + unpack[2]);
+//				System.out.println("pressure = " + unpack[3]);
 				
 				/* update mixer */
 				this.model.getMixer().audioEvent(unpack[0]);
@@ -59,15 +70,14 @@ public class AudioDemultiplexer extends Thread {
 				this.controller.updateGraph(unpack[0]);			
 	
 				bytesRead = stream.read(buffer, 0, buffer.length);
+				System.out.println(bytesRead);
 			}
 		} catch (IOException exception) {
 			controller.showErrorDialog("Error accessing input line");
 		}
-	}
-	
-	public void startStream() {
-		this.isStreamStopped = false;
-		System.out.println("asd");
+		
+		
+		controller.streamStopped();
 	}
 	
 	public void stopStream() {

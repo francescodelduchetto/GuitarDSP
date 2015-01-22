@@ -115,8 +115,8 @@ public class Model {
 		} catch (Exception exception) {
 			controller.showErrorDialog("Input line unavailable");
 		}
+		this.mixer = new Mixer(lineOut,	inputAttenuation, this);
 		this.demultiplexer = new AudioDemultiplexer(lineIn, this, this.controller);
-		this.demultiplexer.start();
 	}
 
 	/**
@@ -187,12 +187,10 @@ public class Model {
 	 * @param fileSelected
 	 *            the path of the audio file.
 	 */
-	public final void startStream(final String fileSelected) {
-		if (fileSelected != null) {
-			this.mixer = new Mixer(lineOut,
-					inputAttenuation, this);
-		}
-		this.demultiplexer.startStream();
+	public final void startStream() {
+		System.out.println(demultiplexer.isAlive());
+		if (!demultiplexer.isAlive())
+			this.demultiplexer.start();
 	}
 
 	/**

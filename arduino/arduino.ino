@@ -26,10 +26,10 @@ void loop(void) {
   uint16_t mask = (1 << 10) - 1;
 
   uint16_t packed[4] = {
-    analogRead(A0) & mask,
-    p.x & mask,
-    p.y & mask,
-    p.z & mask
+    4 & mask,
+    32 & mask,
+    193 & mask,
+    5 & mask
   };
 
   uint8_t bytes[5] = {
@@ -43,6 +43,7 @@ void loop(void) {
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
   //if (p.z > ts.pressureThreshhold) {
-     Serial.print(bytes, 5);
+     Serial.write(bytes, 5);
+     Serial.flush();
   //}
 }
