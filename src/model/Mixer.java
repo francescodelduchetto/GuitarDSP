@@ -24,14 +24,16 @@ public class Mixer {
 	}
 
 	public void audioEvent(short audioSample) {
+		
+		short[] audioBuffer = {audioSample};
 
-		attenuate(audioSample);
+		attenuate(audioBuffer);
 
 		for (Effect effect : model.getEffects()) {
-			effect.process(audioSample, audioSample.length);
+			effect.process(audioBuffer, audioBuffer.length);
 		}
 
-		byte[] byteAudioBuffer = {};
+		byte[] byteAudioBuffer = new byte[2];
 
 		ByteBuffer.wrap(byteAudioBuffer)
 				.order(AudioSettings.getAudioSettings().getByteOrder())

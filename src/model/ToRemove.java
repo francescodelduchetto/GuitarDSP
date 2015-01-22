@@ -81,7 +81,7 @@ public class ToRemove extends Thread {
 	 * @param model
 	 *            the main model.
 	 */
-	public OldStreamer(final SourceDataLine lineOut, final File soundFile,
+	public ToRemove(final SourceDataLine lineOut, final File soundFile,
 			final InputParameter<Double> attenuation,
 			final Controller controller, final Model model) {
 		this.soundFile = soundFile;
@@ -142,7 +142,7 @@ public class ToRemove extends Thread {
 				}
 
 				/* update the graph */
-				this.controller.updateGraph(shortAudioBuffer);
+//				this.controller.updateGraph(shortAudioBuffer);
 
 				/* Re-convert to byte[] */
 				ByteBuffer.wrap(audioBuffer)
@@ -179,7 +179,7 @@ public class ToRemove extends Thread {
 			}
 
 			/* update the graph */
-			this.controller.updateGraph(shortAudioBuffer);
+//			this.controller.updateGraph(shortAudioBuffer);
 
 			/* Re-convert to byte[] */
 			ByteBuffer.wrap(audioBuffer).order(audioSettings.getByteOrder())

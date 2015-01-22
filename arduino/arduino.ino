@@ -47,5 +47,6 @@ void loop(void) {
   // pressure of 0 means no pressing!
   //if (p.z > ts.pressureThreshhold) {
      Serial.print(bytes, 10);
+     Serial.flush();
   //}
 }

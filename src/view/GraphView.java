@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import model.AudioSettings;
+
 /**
  * This class shows the graph of the output signal.
  * 
@@ -29,7 +31,9 @@ public class GraphView extends JFrame {
 	/**
 	 * The audio buffer that is shown.
 	 */
-	private byte[] buffer;
+	private short[] buffer;
+	
+	private int i;
 
 	/**
 	 * Create a new {@code GraphView} with a {@link GraphView} in it.
@@ -39,6 +43,8 @@ public class GraphView extends JFrame {
 
 		this.setSize(600, 400);
 		this.setContentPane(new GraphPanel());
+		this.buffer = new short[AudioSettings.getAudioSettings().getBufferLength()];
+		this.i = 0;
 	}
 
 	/**
@@ -47,9 +53,12 @@ public class GraphView extends JFrame {
 	 * @param currentBuffer
 	 *            the new signal buffer that must be shown.
 	 */
-	public final void repaint(final byte[] currentBuffer) {
-		this.buffer = currentBuffer;
-		super.repaint();
+	public final void repaint(final short currentBuffer) {
+		this.buffer[i++] = currentBuffer;
+		if (i == buffer.length) {
+			i = 0;
+			super.repaint();
+		}
 	}
 
 	/**
@@ -79,7 +88,7 @@ public class GraphView extends JFrame {
 			g.setColor(Color.RED);
 			if (buffer != null) {
 				double ax = (double) buffer.length / this.getSize().width;
-				double ay = (Byte.MAX_VALUE - Byte.MIN_VALUE)
+				double ay = (Short.MAX_VALUE - Short.MIN_VALUE)
 						/ (this.getSize().height - 3);
 				for (int i = 0; i < buffer.length - 1; i++) {
 					int x1 = (int) Math.round(i / ax);

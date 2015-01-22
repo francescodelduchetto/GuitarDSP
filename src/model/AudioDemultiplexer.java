@@ -22,50 +22,62 @@ public class AudioDemultiplexer extends Thread {
 	public AudioDemultiplexer(AudioInputStream stream, Model model, Controller controller) {
 		this.stream = stream;
 		this.model = model;
+		this.controller = controller;
+		this.isStreamStopped = false;
 	}
 	
-	public void run() {
+	@Override
+	public final void run() {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		short[] unpack = new short[4];
 		
 		int bytesRead = -1;
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		controller.streamStarted();
 		
 		try {
 			if (stream != null) {
 				if (stream.available() >= buffer.length) 
 					bytesRead = stream.read(buffer, 0, buffer.length);
-			}
-			/* Apply attenuation */
-//				this.attenuate(audioBuffer);
-
-			for (int i = 0; i < 4; i++) {
-				int mask = (1 << (8 - 2 * i)) - 1;
-				int lshift = 2 * i;
-				int rshift = 8 - 2 * (i + 1);
-				unpack[i] = (short) ((buffer[i] & mask) << lshift + (buffer[i + 1] >> rshift));
+				System.out.println("asd" + bytesRead);
 			}
 			
-			
-			/* update mixer */
-			this.model.getMixer().audioEvent(unpack[0]);
-			
-			notifyEffects(unpack[1], unpack[2], unpack[3]);
-			
-			
-			/* Update the graph */
-			this.controller.updateGraph(audioBuffer);
-			
-//				for (int i=0; i<audioBuffer.length; i++) {
-//					System.out.println(audioBuffer[i]);
-//				}
-//				System.out.println("disponibili = " + this.lineIn.available());
-			
-
-			bytesRead = stream.read(audioBuffer, 0, audioBuffer.length);
-
+//			System.out.println(bytesRead);
+			while(bytesRead != -1 && !isStreamStopped) {
+				for (int i = 0; i < 4; i++) {
+					int mask = (1 << (8 - 2 * i)) - 1;
+					int lshift = 2 * i;
+					int rshift = 8 - 2 * (i + 1);
+					unpack[i] = (short) ((buffer[i] & mask) << lshift + (buffer[i + 1] >> rshift));
+				}
+				
+//				System.out.println("audio = " + unpack[0]);
+//				System.out.println("X = " + unpack[1]);
+//				System.out.println("Y = " + unpack[2]);
+//				System.out.println("pressure = " + unpack[3]);
+				
+				/* update mixer */
+				this.model.getMixer().audioEvent(unpack[0]);
+				
+				notifyEffects(unpack[1], unpack[2], unpack[3]);
+				
+				/* Update the graph */
+				this.controller.updateGraph(unpack[0]);			
+	
+				bytesRead = stream.read(buffer, 0, buffer.length);
+				System.out.println(bytesRead);
+			}
 		} catch (IOException exception) {
 			controller.showErrorDialog("Error accessing input line");
 		}
+		
+		
+		controller.streamStopped();
 	}
 	
 	public void stopStream() {
