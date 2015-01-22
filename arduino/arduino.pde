@@ -23,8 +23,6 @@ void loop(void) {
   // a point object holds x y and z coordinates
   TSPoint p = ts.getPoint();
 
-  uint16_t mask = (1 << 10) - 1;
-
   uint16_t packed[4] = {
     analogRead(A0) & mask,
     p.x & mask,
@@ -32,17 +30,22 @@ void loop(void) {
     p.z & mask
   };
 
-  uint8_t bytes[5] = {
-    packed[0] >> 2,
-    ((packed[0] & ((1 << 2) - 1)) << 6) + (packed[1] >> 4),
-    ((packed[1] & ((1 << 4) - 1)) << 4) + (packed[2] >> 6),
-    ((packed[2] & ((1 << 6) - 1)) << 2) + (packed[3] >> 8),
-    packed[3] & ((1 << 8) - 1)
+  uint8_t bytes[10] = {
+    255,
+    255
+    packed[0] >> 8,
+    packed[0],
+    packed[1] >> 8,
+    packed[1],
+    packed[2] >> 8,
+    packed[2],
+    packed[3] >> 8,
+    packed[3]
   };
 
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
   //if (p.z > ts.pressureThreshhold) {
-     Serial.print(bytes, 5);
+     Serial.print(bytes, 10);
   //}
 }
