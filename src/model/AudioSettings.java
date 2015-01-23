@@ -28,12 +28,12 @@ public final class AudioSettings {
 	
 	private static final int BIT_RATE = 115200;
 	
-	private static final int AUDIO_SAMPLE_SIZE_BITS = 16;
+	private static final int AUDIO_SAMPLE_SIZE_BITS = 8;
 
 	/**
 	 * The size of the sample.
 	 */
-	private static final int SAMPLE_SIZE_BITS = 40;
+	private static final int SAMPLE_SIZE_BITS = 8;
 
 	/**
 	 * The number of samples per second.
@@ -65,7 +65,7 @@ public final class AudioSettings {
 	 * Creates a new {@code AudioSettings}.
 	 */
 	private AudioSettings() {
-		audioFormat = new AudioFormat(SAMPLE_RATE, 16, CHANNELS,
+		audioFormat = new AudioFormat(SAMPLE_RATE, AUDIO_SAMPLE_SIZE_BITS, CHANNELS,
 				SIGNED, BIG_ENDIAN);
 	}
 

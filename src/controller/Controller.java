@@ -191,7 +191,6 @@ public class Controller implements View.ViewObserver {
 
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				model.stopStream();
 				System.exit(0); // close the application
 			}
 

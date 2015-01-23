@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -64,10 +65,7 @@ public class Model {
 	 */
 	private SourceDataLine lineOut;
 
-	/**
-	 * Input line.
-	 */
-	private AudioInputStream lineIn;
+	private SerialBufferedListener usbListener;
 
 	/**
 	 * Instance of {@code Streamer}.
@@ -100,23 +98,17 @@ public class Model {
 	public Model(final Controller controller) {
 		try {
 			audioSettings = AudioSettings.getAudioSettings();
-			lineOut = AudioSystem.getSourceDataLine(audioSettings
-					.getAudioFormat());
-			lineOut.open(audioSettings.getAudioFormat(),
+			AudioFormat outFormat = new AudioFormat(5000 / 16, 16, 1, true, false);
+			lineOut = AudioSystem.getSourceDataLine(outFormat);
+			lineOut.open(outFormat,
 					audioSettings.getBufferLength());
 		} catch (LineUnavailableException e) {
 			controller.showErrorDialog("Output line unavailable");
 		}
 		this.controller = controller;
-		try {
-			TargetDataLine usbLine = new USBDataLine("/dev/ttyUSB0", AudioSettings.getAudioSettings().getAudioFormat());
-			usbLine.open();
-			lineIn = new AudioInputStream(usbLine);
-		} catch (Exception exception) {
-			controller.showErrorDialog("Input line unavailable");
-		}
+		this.usbListener = new SerialBufferedListener("/dev/ttyUSB0");
 		this.mixer = new Mixer(lineOut,	inputAttenuation, this);
-		this.demultiplexer = new AudioDemultiplexer(lineIn, this, this.controller);
+		usbListener.start();
 	}
 
 	/**
@@ -188,8 +180,7 @@ public class Model {
 	 *            the path of the audio file.
 	 */
 	public final void startStream() {
-		System.out.println(demultiplexer.isAlive());
-		if (!demultiplexer.isAlive())
+			this.demultiplexer = new AudioDemultiplexer(usbListener, this, this.controller);
 			this.demultiplexer.start();
 	}
 
