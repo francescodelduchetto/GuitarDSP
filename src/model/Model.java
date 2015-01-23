@@ -65,8 +65,6 @@ public class Model {
 	 */
 	private SourceDataLine lineOut;
 
-	private SerialBufferedListener usbListener;
-
 	/**
 	 * Instance of {@code Streamer}.
 	 */
@@ -106,9 +104,7 @@ public class Model {
 			controller.showErrorDialog("Output line unavailable");
 		}
 		this.controller = controller;
-		this.usbListener = new SerialBufferedListener("/dev/ttyUSB0");
 		this.mixer = new Mixer(lineOut,	inputAttenuation, this);
-		usbListener.start();
 	}
 
 	/**
@@ -180,7 +176,7 @@ public class Model {
 	 *            the path of the audio file.
 	 */
 	public final void startStream() {
-			this.demultiplexer = new AudioDemultiplexer(usbListener, this, this.controller);
+			this.demultiplexer = new AudioDemultiplexer("/dev/ttyUSB0", this, this.controller);
 			this.demultiplexer.start();
 	}
 
