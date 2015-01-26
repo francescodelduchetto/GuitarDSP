@@ -1,7 +1,10 @@
-\documentclass[]{article}
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,italian]{babel}
 
 %opening
-\title{Using arduino to interface a guitar and a trackpad to a PC via USB}
+\title{Interfacciamento di una chitarra e di una pulsantiera ad un PC utilizzando Arduino}
 \author{
 	Del Duchetto, Francesco\\
 	\texttt{francescodelduchetto@gmail.com}
@@ -15,9 +18,36 @@
 \maketitle
 
 \begin{abstract}
-	In this short report we show how arduino can be used to interface a guitar and a trackpad to a PC using the serial port. The interface is then used by a Java software which processes the audio and applying effects like distortion, reverb, and so on. Input data acquired by the trackpad is used to adjust how the effect is applied.
+	Relazione sull'elaborato svolto nell'ambito del corso di \emph{Programmazione di Sistemi Embedded}.
 \end{abstract}
 
-\section{}
+\section{Descrizione sintetica dell'idea del progetto}
+
+Il progetto che abbiamo realizzato consiste nell'utilizzare Arduino per interfacciare una chitarra ed una pulsantiera con un PC, attraverso la porta seriale. L'interfaccia viene poi utilizzata da un software (scritto in Java come elaborato per l'esame di \emph{Programmazione ad oggetti}) che elabora l'audio prodotto dalla chitarra applicandogli effetti quali: distortion, reverb, e così via. I dati acquisiti con la pulsantiera vengono utilizzati per decidere quali effetti ``attivare'' o ``disattivare''.
+
+Gli aspetti salienti, relativamente al corso, sono\dots
+
+\section{Modello semplificato}
+
+Descrizione dell'eventuale modello semplificato considerato per lo sviluppo concreto del progetto.
+
+Descrizione precisa dei requisiti e funzionalità.
+
+\section{Architettura complessiva del sistema}
+
+Descrizione dell'architettura complessiva del sistema.
+
+Quadro degli elementi principali e di come interagiscono.
+
+\section{Struttura, comportamento ed interazione delle varie parti}
+
+Descrizione della struttura/comportamento/interazione delle varie parti.
+
+Utilizzo linguaggi di modellazione appropriati (UML…)
+
+\section{Test effettuati e discussione}
+
+Descrizione test effettuati, documentati da eventuali video dimostrativi, e discussione.
+
 
 \end{document}
