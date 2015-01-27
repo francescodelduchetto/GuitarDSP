@@ -258,6 +258,10 @@ public class Controller implements View.ViewObserver {
 				int returnVal = fileChooser.showSaveDialog(view);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					preset = fileChooser.getSelectedFile();
+					if (!fileChooser.accept(preset)) {
+						JOptionPane.showMessageDialog(view, "File format not accepted");
+						return;
+					}
 					if (preset.exists()) {
 				        int actionDialog = JOptionPane.showConfirmDialog(view,
 				                           "Replace existing file?");

@@ -1,5 +1,6 @@
 package effects;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import model.AudioSettings;
@@ -32,7 +33,7 @@ import model.InputParameter;
  * 
  * @author Francesco Del Duchetto
  */
-public class DelayLine {
+public class DelayLine implements Serializable {
 
 	/**
 	 * Max value of the delay time that can be applied.
