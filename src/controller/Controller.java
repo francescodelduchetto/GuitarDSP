@@ -3,27 +3,33 @@ package controller;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import effects.Effect;
-
-import model.InputParameter;
-import model.Model;
 import view.GraphView;
 import view.View;
+import model.InputParameter;
+import model.Model;
+import effects.Effect;
 
 /**
  * GuitarDSP controller.
@@ -194,54 +200,51 @@ public class Controller implements View.ViewObserver {
 
 			@Override
 			public void windowActivated(final WindowEvent e) {
-				for (Class<? extends Effect> effect: model.getAvailableEffects()) {
-					view.showEffect(effect);
+			}
+		};
+	}
+
+	@Override
+	public final ActionListener getOpenButtonListener() {
+		return new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				JFileChooser fileChooser = view.getFileChooser();
+				int returnVal = fileChooser.showOpenDialog(view);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File soundFile = fileChooser.getSelectedFile();
+					String filePath = soundFile.getPath();
+					view.getFileNameText().setText(filePath);
 				}
 			}
 		};
 	}
 
-//	@Override
-//	public final ActionListener getOpenButtonListener() {
-//		return new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(final ActionEvent e) {
-//				JFileChooser fileChooser = view.getFileChooser();
-//				int returnVal = fileChooser.showOpenDialog(view);
-//				if (returnVal == JFileChooser.APPROVE_OPTION) {
-//					File soundFile = fileChooser.getSelectedFile();
-//					String filePath = soundFile.getPath();
-//					view.getFileNameText().setText(filePath);
-//				}
-//			}
-//		};
-//	}
+	@Override
+	public final ActionListener getAddButtonListener(final JButton addButton) {
+		return new ActionListener() {
 
-//	@Override
-//	public final ActionListener getAddButtonListener(final JButton addButton) {
-//		return new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(final ActionEvent e) {
-//				JPopupMenu effectsPopup = new JPopupMenu();
-//				List<Class<? extends Effect>> effects = model
-//						.getAvailableEffects();
-//				for (Class<? extends Effect> c : effects) {
-//					if (c.getAnnotation(Effect.Attributes.class).isShowable()) {
-//						JMenuItem item = new JMenuItem(c.getAnnotation(
-//								Effect.Attributes.class).name());
-//						item.addActionListener(new PopupMenuItemListener(c));
-//						effectsPopup.add(item);
-//					}
-//				}
-//				Point mousePosition = MouseInfo.getPointerInfo().getLocation();
-//				effectsPopup.show(addButton,
-//						mousePosition.x - addButton.getLocationOnScreen().x,
-//						addButton.getSize().height);
-//			}
-//		};
-//	}
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				JPopupMenu effectsPopup = new JPopupMenu();
+				List<Class<? extends Effect>> effects = model
+						.getAvailableEffects();
+				for (Class<? extends Effect> c : effects) {
+					if (c.getAnnotation(Effect.Attributes.class).isShowable()) {
+						JMenuItem item = new JMenuItem(c.getAnnotation(
+								Effect.Attributes.class).name());
+						item.addActionListener(new PopupMenuItemListener(c));
+						effectsPopup.add(item);
+					}
+				}
+				Point mousePosition = MouseInfo.getPointerInfo().getLocation();
+				effectsPopup.show(addButton,
+						mousePosition.x - addButton.getLocationOnScreen().x,
+						addButton.getSize().height);
+			}
+		};
+	}
 
 	@Override
 	public final ActionListener getStartStopButtonListener() {
@@ -361,24 +364,6 @@ public class Controller implements View.ViewObserver {
 	}
 
 	@Override
-	public ActionListener getAddEffectBtnListener(final Class<? extends Effect> effectType) {
-		return new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					Effect effect = effectType.newInstance();
-					model.addEffect(effect);
-//					view.createEffectPanel(effect);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		};
-	}
-	
-	@Override
 	public final ActionListener getGraphBtnListener() {
 		return new ActionListener() {
 
@@ -390,40 +375,37 @@ public class Controller implements View.ViewObserver {
 			}
 		};
 	}
-	
-	
-
 
 	/**
 	 * The ActionListener which creates a new Effect and shows it on the View as
 	 * a result of pressing of a JMenuItem.
 	 */
-//	private class PopupMenuItemListener implements ActionListener {
-//
-//		/**
-//		 * The type of the effect given by constructor.
-//		 */
-//		private final Class<? extends Effect> effectType;
-//
-//		/**
-//		 * Construct a new {@code PopupMenuItemListener}.
-//		 * 
-//		 * @param classType
-//		 *            the type of the {@link Effect} selected.
-//		 */
-//		public PopupMenuItemListener(final Class<? extends Effect> classType) {
-//			this.effectType = classType;
-//		}
-//
-//		@Override
-//		public void actionPerformed(final ActionEvent e) {
-//			try {
-//				Effect effectInstance = effectType.newInstance();
-//				model.addEffect(effectInstance);
-//				view.createEffectPanel(effectInstance);
-//			} catch (InstantiationException | IllegalAccessException e1) {
-//				showErrorDialog("Unable to create effect");
-//			}
-//		}
-//	}
+	private class PopupMenuItemListener implements ActionListener {
+
+		/**
+		 * The type of the effect given by constructor.
+		 */
+		private final Class<? extends Effect> effectType;
+
+		/**
+		 * Construct a new {@code PopupMenuItemListener}.
+		 * 
+		 * @param classType
+		 *            the type of the {@link Effect} selected.
+		 */
+		public PopupMenuItemListener(final Class<? extends Effect> classType) {
+			this.effectType = classType;
+		}
+
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			try {
+				Effect effectInstance = effectType.newInstance();
+				model.addEffect(effectInstance);
+				view.createEffectPanel(effectInstance);
+			} catch (InstantiationException | IllegalAccessException e1) {
+				showErrorDialog("Unable to create effect");
+			}
+		}
+	}
 }

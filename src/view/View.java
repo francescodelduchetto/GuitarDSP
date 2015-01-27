@@ -60,22 +60,22 @@ public class View extends JFrame {
 	/**
 	 * Button that allow user to open a new file.
 	 */
-//	private JButton openButton = new JButton("Open");
+	private JButton openButton = new JButton("Open");
 
 	/**
 	 * Button that allow the user to add effects.
 	 */
-//	private JButton addButton = new JButton("Add effect");
+	private JButton addButton = new JButton("Add effect");
 
 	/**
 	 * File chooser for select a sound file.
 	 */
-//	private JFileChooser fileChooser = new JFileChooser();
+	private JFileChooser fileChooser = new JFileChooser();
 
 	/**
 	 * TextField that show the path of the selected file.
 	 */
-//	private JTextField fileNameTxt = new JTextField();
+	private JTextField fileNameTxt = new JTextField();
 
 	/**
 	 * Slider to vary the input attenuation.
@@ -127,9 +127,9 @@ public class View extends JFrame {
 		 * themselves
 		 */
 		JPanel contentsPanel = new JPanel();
-		/* Wraps effectsPanel and adds it the vertical JScrollBar */
+		/* It wraps effectsPanel and adds it the vertical JScrollBar */
 		JScrollPane effectsScrollPane = new JScrollPane();
-		/* Panel that contains the slider for the attenuation */
+		/* Panel which contains the slider for the attenuation */
 		JPanel attenuationPanel = new JPanel();
 		/* Panel that allows user to add an effect */
 		JPanel addPanel = new JPanel();
@@ -151,15 +151,15 @@ public class View extends JFrame {
 		inputAttenuationLbl.setAlignmentX(CENTER_ALIGNMENT);
 
 		/* Set the filter for .wav files */
-//		fileChooser.setFileFilter(new WavFileFilter());
+		fileChooser.setFileFilter(new WavFileFilter());
 
 		/* Set-up open panel */
-//		openPanel.setLayout(new BoxLayout(openPanel, BoxLayout.X_AXIS));
-//		openPanel.setBorder(new EmptyBorder(13, 30, 13, 30));
-//		fileNameTxt.setColumns(20);
-//		openPanel.add(fileNameTxt);
-//		openPanel.add(Box.createRigidArea(new Dimension(20, 0)));
-//		openPanel.add(openButton);
+		openPanel.setLayout(new BoxLayout(openPanel, BoxLayout.X_AXIS));
+		openPanel.setBorder(new EmptyBorder(13, 30, 13, 30));
+		fileNameTxt.setColumns(20);
+		openPanel.add(fileNameTxt);
+		openPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+		openPanel.add(openButton);
 
 		/* Set-up start panel */
 		startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
@@ -189,30 +189,30 @@ public class View extends JFrame {
 		attenuationPanel.add(inputAttenuationSld);
 
 		/* Set-up effects panel */
-//		effectsPanel.setLayout(new BoxLayout(effectsPanel, BoxLayout.Y_AXIS));
-//		effectsScrollPane.setViewportView(effectsPanel);
-//		effectsScrollPane
-//				.setHorizontalScrollBarPolicy(
-//						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//		effectsScrollPane
-//				.setVerticalScrollBarPolicy(
-//						JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-//		effectsScrollPane.setMaximumSize(new Dimension(680, Short.MAX_VALUE));
-//		effectsScrollPane.setMinimumSize(new Dimension(680, 530));
-//		effectsScrollPane.setPreferredSize(new Dimension(680, 530));
-//		effectsScrollPane.setWheelScrollingEnabled(true);
+		effectsPanel.setLayout(new BoxLayout(effectsPanel, BoxLayout.Y_AXIS));
+		effectsScrollPane.setViewportView(effectsPanel);
+		effectsScrollPane
+				.setHorizontalScrollBarPolicy(
+						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		effectsScrollPane
+				.setVerticalScrollBarPolicy(
+						JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		effectsScrollPane.setMaximumSize(new Dimension(680, Short.MAX_VALUE));
+		effectsScrollPane.setMinimumSize(new Dimension(680, 530));
+		effectsScrollPane.setPreferredSize(new Dimension(680, 530));
+		effectsScrollPane.setWheelScrollingEnabled(true);
 
 		/* Set-up add panel */
-//		addButton.setMaximumSize(new Dimension(680, 30));
-//		addButton.setMinimumSize(new Dimension(680, 30));
-//		addButton.setPreferredSize(new Dimension(680, 30));
-//		addPanel.add(addButton);
+		addButton.setMaximumSize(new Dimension(680, 30));
+		addButton.setMinimumSize(new Dimension(680, 30));
+		addButton.setPreferredSize(new Dimension(680, 30));
+		addPanel.add(addButton);
 
 		/* Set-up content panel */
 		contentsPanel.setLayout(new BoxLayout(contentsPanel, BoxLayout.Y_AXIS));
 		contentsPanel.add(attenuationPanel);
-//		contentsPanel.add(addPanel);
-		contentsPanel.add(effectsPanel);
+		contentsPanel.add(addPanel);
+		contentsPanel.add(effectsScrollPane);
 
 		/* Set-up root panel */
 		rootPanel.setLayout(new BoxLayout(rootPanel, BoxLayout.Y_AXIS));
@@ -236,8 +236,8 @@ public class View extends JFrame {
 		this.observer = obs;
 		/* Add the listeners */
 		this.addWindowListener(observer.getWindowListener());
-//		openButton.addActionListener(observer.getOpenButtonListener());
-//		addButton.addActionListener(observer.getAddButtonListener(addButton));
+		openButton.addActionListener(observer.getOpenButtonListener());
+		addButton.addActionListener(observer.getAddButtonListener(addButton));
 		startStopButton
 				.addActionListener(observer.getStartStopButtonListener());
 		inputAttenuationSld.addChangeListener(observer
@@ -249,16 +249,16 @@ public class View extends JFrame {
 	/**
 	 * @return the {@link JFileChooser} for select .wav file.
 	 */
-//	public final JFileChooser getFileChooser() {
-//		return this.fileChooser;
-//	}
+	public final JFileChooser getFileChooser() {
+		return this.fileChooser;
+	}
 
 	/**
 	 * @return the {@link JTextField} which shows the name of the selected file.
 	 */
-//	public final JTextField getFileNameText() {
-//		return fileNameTxt;
-//	}
+	public final JTextField getFileNameText() {
+		return fileNameTxt;
+	}
 
 	/**
 	 * @param component
@@ -277,8 +277,15 @@ public class View extends JFrame {
 		return -1;
 	}
 
-	public final void showEffect(final Class<? extends Effect> effectType) {
-		JPanel effectPanel = new ExposedEffectPanel(observer, effectType);
+	/**
+	 * Create and shows a new panel that allows user to controls the effect's
+	 * parameters.
+	 * 
+	 * @param effect
+	 *            the type of {@link Effect} that must be showed.
+	 */
+	public final void createEffectPanel(final Effect effect) {
+		JPanel effectPanel = new EffectPanel(observer, effect);
 		effectsPanel.add(effectPanel);
 
 		if (getComponentIndex(effectPanel) % 2 == 0) {
@@ -287,23 +294,6 @@ public class View extends JFrame {
 		effectsPanel.repaint();
 		effectsPanel.revalidate();
 	}
-	/**
-	 * Create and shows a new panel that allows user to controls the effect's
-	 * parameters.
-	 * 
-	 * @param effect
-	 *            the type of {@link Effect} that must be showed.
-	 */
-//	public final void createEffectPanel(final Effect effect) {
-//		JPanel effectPanel = new EffectPanel(observer, effect);
-//		effectsPanel.add(effectPanel);
-//
-//		if (getComponentIndex(effectPanel) % 2 == 0) {
-//			setComponentColor(effectPanel, new Color(224, 224, 224));
-//		}
-//		effectsPanel.repaint();
-//		effectsPanel.revalidate();
-//	}
 
 	/**
 	 * Set the background color of a component.
@@ -341,43 +331,43 @@ public class View extends JFrame {
 	 * The {@link FileFilter} that allows to select .wav files from the
 	 * {@link JFileChooser}.
 	 */
-//	private class WavFileFilter extends FileFilter {
-//		@Override
-//		public String getDescription() {
-//			return ".wav";
-//		}
-//
-//		@Override
-//		public boolean accept(final File arg0) {
-//			// Accept directory to navigate into file-system
-//			if (arg0.isDirectory()) {
-//				return true;
-//			}
-//			// Accept file with .wav extension
-//			String extension = getExtension(arg0);
-//			if (extension != null && extension.equals("wav")) {
-//				return true;
-//			}
-//			return false;
-//		}
-//
-//		/**
-//		 * Get the extension of a file.
-//		 * 
-//		 * @param f 
-//		 * 		the file.
-//		 * @return the extension of the specified file.
-//		 */
-//		private String getExtension(final File f) {
-//			String ext = null;
-//			String s = f.getName();
-//			int i = s.lastIndexOf('.');
-//			if (i > 0 && i < s.length() - 1) {
-//				ext = s.substring(i + 1).toLowerCase();
-//			}
-//			return ext;
-//		}
-//	}
+	private class WavFileFilter extends FileFilter {
+		@Override
+		public String getDescription() {
+			return ".wav";
+		}
+
+		@Override
+		public boolean accept(final File arg0) {
+			// Accept directory to navigate into file-system
+			if (arg0.isDirectory()) {
+				return true;
+			}
+			// Accept file with .wav extension
+			String extension = getExtension(arg0);
+			if (extension != null && extension.equals("wav")) {
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Get the extension of a file.
+		 * 
+		 * @param f 
+		 * 		the file.
+		 * @return the extension of the specified file.
+		 */
+		private String getExtension(final File f) {
+			String ext = null;
+			String s = f.getName();
+			int i = s.lastIndexOf('.');
+			if (i > 0 && i < s.length() - 1) {
+				ext = s.substring(i + 1).toLowerCase();
+			}
+			return ext;
+		}
+	}
 
 	/**
 	 * Define the methods that a {@link Controller} for this {@code View} must
@@ -397,7 +387,7 @@ public class View extends JFrame {
 		 * @return the {@link ActionListener} that shows the
 		 *         {@link JFileChooser} to choose the file.
 		 */
-//		ActionListener getOpenButtonListener();
+		ActionListener getOpenButtonListener();
 
 		/**
 		 * @param addButton
@@ -406,7 +396,7 @@ public class View extends JFrame {
 		 * @return the {@code ActionListener} that shows the {@link JPopupMenu}
 		 *         that allows user to select the effect to add.
 		 */
-//		ActionListener getAddButtonListener(JButton addButton);
+		ActionListener getAddButtonListener(JButton addButton);
 
 		/**
 		 * @return the {@link ActionListener} that start/stop the stream.
@@ -448,8 +438,6 @@ public class View extends JFrame {
 		 * @return a {@code Listener} for the {@link JButton}.
 		 */
 		ActionListener getRemoveEffectBtnListener(JPanel panel);
-		
-		ActionListener getAddEffectBtnListener(Class<? extends Effect> effectType);
 
 		/**
 		 * @return an {@code ActionListener} for the button which shows the

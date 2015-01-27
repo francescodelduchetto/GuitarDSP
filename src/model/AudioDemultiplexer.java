@@ -59,7 +59,7 @@ public class AudioDemultiplexer extends Thread {
 //		int sample = -1;
 		short prev_audio = 512;
 		controller.streamStarted();
-		while (!isStreamStopped) {
+		while (true) {
 			try {
 				b[4] = b[3];
 				b[3] = b[2];
@@ -140,7 +140,6 @@ public class AudioDemultiplexer extends Thread {
 
 	public void stopStream() {
 		this.isStreamStopped = true;
-		controller.streamStopped();
 	}
 
 	private void notifyEffects(short touchX, short touchY, short pressure) {

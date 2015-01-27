@@ -30,8 +30,8 @@ import effects.ReverbEffect;
  * line such as the length of the buffer or the sample rate.
  * 
  * <p>
- * It is able to start and stop a {@link OldStreamer} which acts the streaming
- * of the audio input and applies the effects selected. The effects are also
+ * It is able to start and stop a {@link OldStreamer} which acts the streaming of
+ * the audio input and applies the effects selected. The effects are also
  * managed by the {@code Model} that provide methods to add and remove an effect
  * and to exchange two effects.
  * 
@@ -57,9 +57,9 @@ public class Model {
 	/**
 	 * Attenuation of the audio input.
 	 */
-	private InputParameter<Double> inputAttenuation = new InputParameter<Double>(
-			"input attenuation", MIN_ATTENUATION, MAX_ATTENUATION,
-			INITIAL_ATTENUATION);
+	private InputParameter<Double> inputAttenuation = 
+			new InputParameter<Double>("input attenuation", MIN_ATTENUATION, 
+					MAX_ATTENUATION, INITIAL_ATTENUATION);
 
 	/**
 	 * Output line.
@@ -85,7 +85,7 @@ public class Model {
 	 * Contains the settings of the audio streaming.
 	 */
 	private AudioSettings audioSettings;
-
+	
 	private AudioDemultiplexer demultiplexer;
 
 	/**
@@ -99,12 +99,13 @@ public class Model {
 			audioSettings = AudioSettings.getAudioSettings();
 			AudioFormat outFormat = new AudioFormat(5000, 16, 1, true, false); // 307692
 			lineOut = AudioSystem.getSourceDataLine(outFormat);
-			lineOut.open(outFormat, audioSettings.getBufferLength());
+			lineOut.open(outFormat,
+					audioSettings.getBufferLength());
 		} catch (LineUnavailableException e) {
 			controller.showErrorDialog("Output line unavailable");
 		}
 		this.controller = controller;
-		this.mixer = new Mixer(lineOut, inputAttenuation, this);
+		this.mixer = new Mixer(lineOut,	inputAttenuation, this);
 	}
 
 	/**
@@ -169,16 +170,15 @@ public class Model {
 	}
 
 	/**
-	 * Starts a new {@link OldStreamer} which stream the file located at the
-	 * given path.
+	 * Starts a new {@link OldStreamer} which stream the file located at the given
+	 * path.
 	 * 
 	 * @param fileSelected
 	 *            the path of the audio file.
 	 */
 	public final void startStream() {
-		this.demultiplexer = new AudioDemultiplexer("/dev/ttyUSB0", this,
-				this.controller);
-		this.demultiplexer.start();
+			this.demultiplexer = new AudioDemultiplexer("/dev/ttyUSB0", this, this.controller);
+			this.demultiplexer.start();
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class Model {
 		}
 		this.demultiplexer.stopStream();
 	}
-
+	
 	public Mixer getMixer() {
 		return this.mixer;
 	}
