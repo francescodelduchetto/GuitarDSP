@@ -4,17 +4,17 @@ import effects.Effect;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import controller.Controller;
+
 
 public class AudioDemultiplexer extends Thread {
 
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
 
-	private int debug = 0;
+	private int debug = 1;
 	
 	private Model model;
 
@@ -23,6 +23,7 @@ public class AudioDemultiplexer extends Thread {
 	private boolean isStreamStopped;
 
 	private InputStream input;
+//	private BufferedReader input;
 	private int bytes_read;
 
 	public AudioDemultiplexer(String portName, Model model, Controller controller) {
@@ -37,10 +38,12 @@ public class AudioDemultiplexer extends Thread {
 			SerialPort serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
 
 			// set port parameters
-			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort.setSerialPortParams(2000000, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open the stream
 			input = serialPort.getInputStream();
+//			input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+			
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}
@@ -48,56 +51,86 @@ public class AudioDemultiplexer extends Thread {
 
 	@Override
 	public final void run() {
+		short[] window = new short[5];
+		
 		int[] b = new int[] {
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+			-1, -1, -1, -1, -1
 		};
+//		int sample = -1;
+		short prev_audio = 512;
 		controller.streamStarted();
 		while (true) {
 			try {
-				b[10] = b[9];
-				b[9] = b[8];
-				b[8] = b[7];
-				b[7] = b[6];
-				b[6] = b[5];
-				b[5] = b[4];
 				b[4] = b[3];
 				b[3] = b[2];
 				b[2] = b[1];
 				b[1] = b[0];
-				b[0] = input.read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (b[0] == -1) {
-				if (debug == 1) System.out.println("Warning: input.read() == -1; non ci sono dati da leggere.");
+				b[0] = ( input.read());
+//				sample = Integer.parseInt( input.readLine());
+			} catch (Exception e) {
+//				e.printStackTrace();
 				continue;
 			}
-			bytes_read++;
-			if (bytes_read % 1000 == 0) {
-				System.out.println("(letti: " + bytes_read + ")");
-			}
+//			if (b[0] == -1) {
+//				if (debug == 1) System.out.println("Warning: input.read() == -1; non ci sono dati da leggere.");
+//				continue;
+//			}
+//			bytes_read++;
+//			if (bytes_read % 1000 == 0) {
+//				System.out.println("(letti: " + bytes_read + ")");
+//			}
 
 			// Check sync bytes
 			if (b[0] != 255 && b[1] == 255 && b[2] == 255) {
-				short zero = 1 << 9;
+				assert b[3] != 255;
+				assert b[4] != 255;
+//				
+//				if (debug == 1) {
+//					System.out.println("b[3] = " + b[3]);
+//					System.out.println("b[4] = " + b[4]);
+//				}
 				
+				short zero = 1 << 9;
+
 				// Parse shorts from bytes
-				short audio = (short) ((b[10] << 8 | b[9]) - zero);
-				short touch_x = (short) ((b[8] << 8 | b[7]) - zero);
-				short touch_y = (short) ((b[6] << 8 | b[5]) - zero);
-				short pressure = (short) ((b[4] << 8 | b[3]) - zero);
+				short audio = (short) (b[4] << 8);
+//				short audio = (short)sample;
+				audio |= b[3];
+				
+				if (debug == 1) {
+//					System.out.println("audio before = " + audio);
+				}
+//				if (Math.abs(audio - prev_audio) > 40) {
+//					audio = prev_audio;
+//				}
+//				prev_audio = audio;
+//				
+				audio -= zero;
+				
+				if (debug == 1) {
+//					System.out.println("audio between = " + audio);
+				}
+
+				audio *= 1 << 6;
+
+//				window[4] = window[3];
+//				window[3] = window[2];
+//				window[2] = window[1];
+//				window[1] = window[0];
+//				window[0] = audio;
+//				
+//				int sum = 0;
+//				for (int x: window){
+//					sum += x;
+//				}
+//				audio = (short) (sum / window.length);
 
 				if (debug == 1) {
-					System.out.println("audio = " + audio);
-					System.out.println("X = " + touch_x);
-					System.out.println("Y = " + touch_y);
-					System.out.println("pressure = " + pressure);
+					System.out.println("audio after = " + audio);
 				}
 
 				/* update mixer */
 				this.model.getMixer().audioEvent(audio);
-
-				notifyEffects(touch_x, touch_y, pressure);
 
 				/* Update the graph */
 				this.controller.updateGraph(audio);

@@ -26,8 +26,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-import model.InputParameter;
 import controller.Controller;
+
+import model.InputParameter;
 import effects.Effect;
 
 /**

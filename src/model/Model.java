@@ -12,6 +12,7 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import controller.Controller;
+
 import effects.ButterworthLPFilterEffect;
 import effects.DelayEffect;
 import effects.Effect;
@@ -93,10 +94,10 @@ public class Model {
 	 * @param controller
 	 *            the main {@link Controller} of the application.
 	 */
-	public Model(final Controller controller) {
+	public Model(final controller.Controller controller) {
 		try {
 			audioSettings = AudioSettings.getAudioSettings();
-			AudioFormat outFormat = new AudioFormat(5000 / 16, 16, 1, true, false);
+			AudioFormat outFormat = new AudioFormat(5000, 16, 1, true, false); // 307692
 			lineOut = AudioSystem.getSourceDataLine(outFormat);
 			lineOut.open(outFormat,
 					audioSettings.getBufferLength());

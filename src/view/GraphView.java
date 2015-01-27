@@ -43,7 +43,7 @@ public class GraphView extends JFrame {
 
 		this.setSize(600, 400);
 		this.setContentPane(new GraphPanel());
-		this.buffer = new short[AudioSettings.getAudioSettings().getBufferLength()];
+		this.buffer = new short[100];
 		this.i = 0;
 	}
 
@@ -54,7 +54,8 @@ public class GraphView extends JFrame {
 	 *            the new signal buffer that must be shown.
 	 */
 	public final void repaint(final short currentBuffer) {
-		this.buffer[i++] = currentBuffer;
+		this.buffer[i] = currentBuffer;
+		i++;
 		if (i == buffer.length) {
 			i = 0;
 			super.repaint();
@@ -91,12 +92,14 @@ public class GraphView extends JFrame {
 				double ay = (Short.MAX_VALUE - Short.MIN_VALUE)
 						/ (this.getSize().height - 3);
 				for (int i = 0; i < buffer.length - 1; i++) {
-					int x1 = (int) Math.round(i / ax);
-					int x2 = (int) Math.round((i + 1) / ax);
-					int y1 = (int) Math.round(buffer[i] / ay);
-					int y2 = (int) Math.round(buffer[i + 1] / ay);
+					short x1 = (short) Math.round(i / ax);
+					short x2 = (short) Math.round((i + 1) / ax);
+					short y1 = (short) Math.round(buffer[i] / ay);
+					short y2 = (short) Math.round(buffer[i + 1] / ay);
 					y1 += this.getSize().height / 2 - 1;
 					y2 += this.getSize().height / 2 - 1;
+					y1 = (short) (this.getSize().height - y1);
+					y2 = (short) (this.getSize().height - y2);
 					g.drawLine(x1, y1, x2, y2);
 				}
 			}
