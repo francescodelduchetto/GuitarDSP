@@ -32,13 +32,13 @@ uint8_t ButtonImpl::getPin() {
 }
 
 void ButtonImpl::notifyListeners() {
-	for (auto listener: this->listeners) {
-		listener->notifyButtonPressed();
+	for (int i=0; i<MAX_LISTENERS; i++) {
+		this->listeners[i]->notifyButtonPressed();
 	}
 }
 
 bool ButtonImpl::registerListener(ButtonListener* listener) {
-	if (this->nListeners < this->MAX_LISTENERS) {
+	if (this->nListeners < MAX_LISTENERS) {
 		this->listeners[this->nListeners] = listener;
 		this->nListeners++;
 		return true;
