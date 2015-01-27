@@ -6,7 +6,7 @@
 
 ### PROJECT_DIR
 ### This is the path to where you have created/cloned your project
-PROJECT_DIR       = /home/francesco/workspace/GuitarDSP/arduino
+PROJECT_DIR       = $(realpath .)
 
 ### ARDMK_DIR
 ### Path to the Arduino-Makefile directory.

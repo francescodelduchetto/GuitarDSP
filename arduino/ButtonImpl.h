@@ -11,7 +11,7 @@ class ButtonImpl: public Button {
  
   public:
     
-    ButtonImpl(int pin);
+    ButtonImpl(uint8_t pin);
     bool isPressed();
     bool registerListener(ButtonListener *listener);
   

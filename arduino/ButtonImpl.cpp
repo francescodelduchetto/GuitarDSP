@@ -6,18 +6,21 @@
 ButtonImpl* buttons[MAX_BUTTONS];
 uint8_t nButtons= 0;
 
+void asd() {
+}
+
 bool registerNewButton(ButtonImpl* button) {
 	if (nButtons < MAX_BUTTONS) {
 		buttons[nButtons] = button;
 		nButtons++;
-		attachInterrupt(button->getPin(), button->notifyListeners, RISING);
+		attachInterrupt(button->getPin(), asd, RISING);
 		return true;
 	} else {
 		return false;
 	}
 }
 
-void ButtonImpl::ButtonImpl(uint8_t pin) {
+ButtonImpl::ButtonImpl(uint8_t pin) {
 	this->pin = pin;
 	pinMode(pin, INPUT);
 	this->nListeners = 0;
