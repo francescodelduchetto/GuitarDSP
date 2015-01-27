@@ -4,6 +4,8 @@
 #include "Button.h"
 #include <stdint.h>
 
+#define MAX_LISTENERS 5
+
 class ButtonImpl: public Button {
 public:
     ButtonImpl(uint8_t);
