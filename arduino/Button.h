@@ -2,16 +2,14 @@
 #define __BUTTONH__
 
 class ButtonListener {
- 
-  public:
-	virtual void notifyButtonPressed() = 0; 
+public:
+    virtual void notifyButtonPressed() = 0;
 };
 
 class Button {
-  
-  public:
+public:
     virtual bool isPressed() = 0;
-    virtual bool registerListener(ButtonListener* listener) = 0;
+    virtual bool registerListener(ButtonListener*) = 0;
 };
 
 #endif
