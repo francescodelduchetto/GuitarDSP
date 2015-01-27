@@ -1,5 +1,6 @@
 package effects;
 
+import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,7 +28,7 @@ import model.InputParameter;
  * 
  * @author Francesco Del Duchetto
  */
-public interface Effect extends Observer {
+public interface Effect extends Observer, Serializable {
 
 	/**
 	 * Apply the effect on the buffer given altering it.

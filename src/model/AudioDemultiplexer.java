@@ -51,15 +51,15 @@ public class AudioDemultiplexer extends Thread {
 
 	@Override
 	public final void run() {
-		short[] window = new short[5];
+//		short[] window = new short[5];
 		
 		int[] b = new int[] {
 			-1, -1, -1, -1, -1
 		};
 //		int sample = -1;
-		short prev_audio = 512;
+//		short prev_audio = 512;
 		controller.streamStarted();
-		while (true) {
+		while (!isStreamStopped) {
 			try {
 				b[4] = b[3];
 				b[3] = b[2];
@@ -140,6 +140,7 @@ public class AudioDemultiplexer extends Thread {
 
 	public void stopStream() {
 		this.isStreamStopped = true;
+		this.controller.streamStopped();
 	}
 
 	private void notifyEffects(short touchX, short touchY, short pressure) {

@@ -1,18 +1,14 @@
 package model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.TargetDataLine;
 
 import controller.Controller;
-
 import effects.ButterworthLPFilterEffect;
 import effects.DelayEffect;
 import effects.Effect;
@@ -146,6 +142,10 @@ public class Model {
 	 */
 	public final void removeEffect(final int index) {
 		effectsList.remove(index);
+	}
+	
+	public final void removeAllEffects() {
+		this.effectsList.clear();
 	}
 
 	/**

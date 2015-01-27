@@ -10,6 +10,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +30,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import view.GraphView;
-import view.View;
 import model.InputParameter;
 import model.Model;
+import view.GraphView;
+import view.View;
 import effects.Effect;
 
 /**
@@ -58,6 +63,8 @@ public class Controller implements View.ViewObserver {
 	 * The value is true if a Streamer is streaming, false if not.
 	 */
 	private boolean isStreamRunning;
+	
+	private File preset;
 
 	/**
 	 * The text that the start/stop button of the View must show when the
@@ -213,10 +220,68 @@ public class Controller implements View.ViewObserver {
 				JFileChooser fileChooser = view.getFileChooser();
 				int returnVal = fileChooser.showOpenDialog(view);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File soundFile = fileChooser.getSelectedFile();
-					String filePath = soundFile.getPath();
+					preset = fileChooser.getSelectedFile();
+					String filePath = preset.getPath();
 					view.getFileNameText().setText(filePath);
+					view.removeAllEffectPanel();
+					model.removeAllEffects();
+					try {
+						FileInputStream fileStream = new FileInputStream(preset);
+						ObjectInputStream objStream = new ObjectInputStream(fileStream);
+						Effect effect = (Effect) objStream.readObject();
+						while (effect != null) {
+							view.createEffectPanel(effect);
+							model.addEffect(effect);
+							effect = (Effect) objStream.readObject();
+						}
+						objStream.close();
+						fileStream.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (ClassNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
+			}
+		};
+	}
+	
+	@Override
+	public final ActionListener getSaveButtonListener() {
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = view.getFileChooser();
+				int returnVal = fileChooser.showSaveDialog(view);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					preset = fileChooser.getSelectedFile();
+					if (preset.exists()) {
+				        int actionDialog = JOptionPane.showConfirmDialog(view,
+				                           "Replace existing file?");
+				        // may need to check for cancel option as well
+				        if (actionDialog == JOptionPane.CANCEL_OPTION | actionDialog == JOptionPane.NO_OPTION)
+				            return;
+				    }
+					String fileName = preset.getAbsolutePath();
+					try {
+						FileOutputStream fileStream = new FileOutputStream(fileName);
+						System.out.println(preset.getAbsolutePath());
+						ObjectOutputStream objStream = new ObjectOutputStream(fileStream);
+						for (Effect effect: model.getEffects()) {
+							objStream.writeObject(effect);
+						}
+						objStream.writeObject(null);
+						objStream.close();
+						fileStream.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+					
 			}
 		};
 	}

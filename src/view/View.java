@@ -61,6 +61,8 @@ public class View extends JFrame {
 	 * Button that allow user to open a new file.
 	 */
 	private JButton openButton = new JButton("Open");
+	
+	private JButton saveButton = new JButton("Save");
 
 	/**
 	 * Button that allow the user to add effects.
@@ -151,7 +153,7 @@ public class View extends JFrame {
 		inputAttenuationLbl.setAlignmentX(CENTER_ALIGNMENT);
 
 		/* Set the filter for .wav files */
-		fileChooser.setFileFilter(new WavFileFilter());
+		fileChooser.setFileFilter(new PresetFileFilter());
 
 		/* Set-up open panel */
 		openPanel.setLayout(new BoxLayout(openPanel, BoxLayout.X_AXIS));
@@ -160,6 +162,7 @@ public class View extends JFrame {
 		openPanel.add(fileNameTxt);
 		openPanel.add(Box.createRigidArea(new Dimension(20, 0)));
 		openPanel.add(openButton);
+		openPanel.add(saveButton);
 
 		/* Set-up start panel */
 		startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
@@ -237,6 +240,7 @@ public class View extends JFrame {
 		/* Add the listeners */
 		this.addWindowListener(observer.getWindowListener());
 		openButton.addActionListener(observer.getOpenButtonListener());
+		saveButton.addActionListener(obs.getSaveButtonListener());
 		addButton.addActionListener(observer.getAddButtonListener(addButton));
 		startStopButton
 				.addActionListener(observer.getStartStopButtonListener());
@@ -286,13 +290,17 @@ public class View extends JFrame {
 	 */
 	public final void createEffectPanel(final Effect effect) {
 		JPanel effectPanel = new EffectPanel(observer, effect);
-		effectsPanel.add(effectPanel);
+		this.effectsPanel.add(effectPanel);
 
 		if (getComponentIndex(effectPanel) % 2 == 0) {
 			setComponentColor(effectPanel, new Color(224, 224, 224));
 		}
-		effectsPanel.repaint();
-		effectsPanel.revalidate();
+		this.effectsPanel.repaint();
+		this.effectsPanel.revalidate();
+	}
+	
+	public final void removeAllEffectPanel() {
+		this.effectsPanel.removeAll();
 	}
 
 	/**
@@ -331,10 +339,10 @@ public class View extends JFrame {
 	 * The {@link FileFilter} that allows to select .wav files from the
 	 * {@link JFileChooser}.
 	 */
-	private class WavFileFilter extends FileFilter {
+	private class PresetFileFilter extends FileFilter {
 		@Override
 		public String getDescription() {
-			return ".wav";
+			return ".preset";
 		}
 
 		@Override
@@ -345,7 +353,7 @@ public class View extends JFrame {
 			}
 			// Accept file with .wav extension
 			String extension = getExtension(arg0);
-			if (extension != null && extension.equals("wav")) {
+			if (extension != null && extension.equals("preset")) {
 				return true;
 			}
 			return false;
@@ -388,6 +396,8 @@ public class View extends JFrame {
 		 *         {@link JFileChooser} to choose the file.
 		 */
 		ActionListener getOpenButtonListener();
+		
+		ActionListener getSaveButtonListener();
 
 		/**
 		 * @param addButton

@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.util.Observable;
 
 import javax.swing.JSlider;
@@ -29,7 +30,7 @@ import javax.swing.JSlider;
  *            type which must be {@link Integer} or {@link Double} obtaining
  *            otherwise a {@link IllegalArgumentException}.
  */
-public class InputParameter<N extends Number> extends Observable {
+public class InputParameter<N extends Number> extends Observable implements Serializable {
 
 	/**
 	 * The name of the parameter.

@@ -6,8 +6,6 @@ import java.awt.Graphics;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import model.AudioSettings;
-
 /**
  * This class shows the graph of the output signal.
  * 
