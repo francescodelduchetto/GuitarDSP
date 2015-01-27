@@ -5,19 +5,15 @@
 #include <stdint.h>
 
 class ButtonImpl: public Button {
- 
-  public:
-    const uint8_t ButtonImpl::MAX_LISTENERS = 5;
-    
-    ButtonImpl(uint8_t pin);
+public:
+    ButtonImpl(uint8_t);
     bool isPressed();
-    bool registerListener(ButtonListener *listener);
-  
+    bool registerListener(ButtonListener*);
+
     void notifyListeners();
     uint8_t getPin();
-  
-  private:
 
+private:
     uint8_t pin;
     uint8_t nListeners;
     ButtonListener* listeners[MAX_LISTENERS];  
