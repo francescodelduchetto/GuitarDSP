@@ -4,12 +4,10 @@
 #include "Button.h"
 #include <stdint.h>
 
-#define MAX_LISTENERS 5
-
-
 class ButtonImpl: public Button {
  
   public:
+    const uint8_t ButtonImpl::MAX_LISTENERS = 5;
     
     ButtonImpl(uint8_t pin);
     bool isPressed();
