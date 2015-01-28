@@ -14,7 +14,7 @@ bool registerNewButton(ButtonImpl* button) {
     if (nButtons < MAX_BUTTONS) {
         buttons[nButtons] = button;
         nButtons++;
-        attachInterrupt(button->getPin(), asd, RISING);
+        attachInterrupt(button->getPin(), asd, CHANGE);
         return true;
     } else {
         return false;
@@ -26,6 +26,10 @@ ButtonImpl::ButtonImpl(uint8_t pin) {
     pinMode(pin, INPUT);
     this->nListeners = 0;
     registerNewButton(this);
+}
+
+bool ButtonImpl::isPressed() {
+    return digitalRead(this->pin) == HIGH;
 }
 
 uint8_t ButtonImpl::getPin() {

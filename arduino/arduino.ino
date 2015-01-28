@@ -81,5 +81,5 @@ void loop(void) {
     //~ Serial.write((s >> 8) & 255);
     //~ Serial.write(s & 255);
     
-    Serial.println(listener->getCount());
+    Serial.println(button_a->isPressed());
 }
