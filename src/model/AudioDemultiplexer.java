@@ -21,6 +21,8 @@ public class AudioDemultiplexer extends Thread {
 	private Controller controller;
 
 	private boolean isStreamStopped;
+	
+	private SerialPort serialPort;
 
 	private InputStream input;
 //	private BufferedReader input;
@@ -35,7 +37,7 @@ public class AudioDemultiplexer extends Thread {
 		try {
 			CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(portName);
 			// open serial port, and use class name for the appName.
-			SerialPort serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
 
 			// set port parameters
 			serialPort.setSerialPortParams(2000000, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
@@ -98,7 +100,7 @@ public class AudioDemultiplexer extends Thread {
 				audio |= b[3];
 				
 				if (debug == 1) {
-//					System.out.println("audio before = " + audio);
+					System.out.println("audio before = " + audio);
 				}
 //				if (Math.abs(audio - prev_audio) > 40) {
 //					audio = prev_audio;
@@ -140,6 +142,7 @@ public class AudioDemultiplexer extends Thread {
 
 	public void stopStream() {
 		this.isStreamStopped = true;
+		this.serialPort.close();
 		this.controller.streamStopped();
 	}
 

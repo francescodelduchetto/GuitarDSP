@@ -42,7 +42,7 @@ void setup() {
 	// turn on CTC mode
 	TCCR1A |= (1 << WGM11);
 	// Set CS01 and CS00 bits for 64 prescaler
-	TCCR1B |= (1 << CS10) | (1 << CS12);   
+	TCCR1B |= (1 << CS11);// | (1 << CS12);   
 	// enable timer compare interrupt
 	TIMSK1 |= (1 << OCIE1A);
 	
@@ -64,16 +64,7 @@ void setup() {
 		button[i] = new ButtonImpl(i);
 		button[i]->registerListener(dispatcher);
 	}
-}
-
-// -------------PIN CHANGE interrupt
-ISR(PCINT0_vect) {
-	for (int i=0; i<N_BUTTON; i++) {
-		if (button[i]->isPressed(counter->getValue())) {
-			button[i]->notifyListener();
-		}
-	}
-}
+}	
 
 ISR(TIMER0_COMPA_vect) {
 	counter->tick();

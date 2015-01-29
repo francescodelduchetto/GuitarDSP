@@ -18,14 +18,14 @@ void Dispatcher::notifyNewSample(uint16_t sample) {
 		this->commandAvailable = false;
 		//~ cli();
 		for (int i=0; i<5; i++) {
-			Serial.println((int)this->packet[i]);
+			Serial.write((int)this->packet[i]);
 		}
 		//~ sei();
 	} else {
 		//~ Serial.write(this->packet, 4);
 		//~ cli();
 		for (int i=0; i<4; i++) {
-			Serial.println((int)this->packet[i]);
+			Serial.write((int)this->packet[i]);
 		}
 		//~ sei();
 	}
