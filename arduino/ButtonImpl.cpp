@@ -24,9 +24,9 @@ uint8_t ButtonImpl::getPin() {
 }
 
 void ButtonImpl::notifyListener() {
-	this->listener->notifyButtonPressed(this->pin);
+    this->listener->notifyButtonPressed(this->pin);
 }
 
 void ButtonImpl::registerListener(ButtonListener* listener) {
-	this->listener = listener;
+    this->listener = listener;
 }
