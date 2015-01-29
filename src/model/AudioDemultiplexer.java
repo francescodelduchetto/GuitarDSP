@@ -26,7 +26,6 @@ public class AudioDemultiplexer extends Thread {
 
 	private InputStream input;
 //	private BufferedReader input;
-	private int bytes_read;
 
 	public AudioDemultiplexer(String portName, Model model, Controller controller) {
 		this.model = model;
@@ -56,18 +55,19 @@ public class AudioDemultiplexer extends Thread {
 //		short[] window = new short[5];
 		
 		int[] b = new int[] {
-			-1, -1, -1, -1, -1
+			-1, -1, -1, -1, -1, -1
 		};
 //		int sample = -1;
 //		short prev_audio = 512;
 		controller.streamStarted();
 		while (!isStreamStopped) {
 			try {
+				b[5] = b[4];
 				b[4] = b[3];
 				b[3] = b[2];
 				b[2] = b[1];
 				b[1] = b[0];
-				b[0] = ( input.read());
+				b[0] = input.read();
 //				sample = Integer.parseInt( input.readLine());
 			} catch (Exception e) {
 //				e.printStackTrace();
@@ -83,22 +83,26 @@ public class AudioDemultiplexer extends Thread {
 //			}
 
 			// Check sync bytes
-			if (b[0] != 255 && b[1] == 255 && b[2] == 255) {
-				assert b[3] != 255;
-				assert b[4] != 255;
-//				
+			if (b[5] != 255 && b[4] == 255 && b[3] == 255) {
+				assert b[2] != 255;
+				assert b[1] != 255;
+
+				if (b[0] != 255) {
+					// There are both and audio sample and a button event
+					this.notifyButtonPressed(b[0]);
+				}
+
 //				if (debug == 1) {
 //					System.out.println("b[3] = " + b[3]);
 //					System.out.println("b[4] = " + b[4]);
 //				}
-				
+
 				short zero = 1 << 9;
 
 				// Parse shorts from bytes
-				short audio = (short) (b[4] << 8);
-//				short audio = (short)sample;
-				audio |= b[3];
-				
+				short audio = (short) (b[2] << 8);
+				audio |= b[1];
+
 				if (debug == 1) {
 					System.out.println("audio before = " + audio);
 				}
@@ -106,9 +110,9 @@ public class AudioDemultiplexer extends Thread {
 //					audio = prev_audio;
 //				}
 //				prev_audio = audio;
-//				
+
 				audio -= zero;
-				
+
 				if (debug == 1) {
 //					System.out.println("audio between = " + audio);
 				}
@@ -152,6 +156,10 @@ public class AudioDemultiplexer extends Thread {
 			for (Effect effect : this.model.getEffects()) {
 				effect.touchpadEvent(touchX, touchY, pressure);
 			}
+	}
+	
+	private void notifyButtonPressed(int button) {
+		System.out.println("Premuto pulsante: " + button);
 	}
 
 }
