@@ -3,22 +3,21 @@
 
 #include "Button.h"
 #include <stdint.h>
-
-#define MAX_LISTENERS 5
-
+ 
 class ButtonImpl: public Button {
 public:
     ButtonImpl(uint8_t);
-    bool isPressed();
-    bool registerListener(ButtonListener*);
+    bool isPressed(uint16_t);
+    void registerListener(ButtonListener*);
 
-    void notifyListeners();
+    void notifyListener();
     uint8_t getPin();
 
 private:
+	const uint16_t TOLERANCE = 30;
     uint8_t pin;
-    uint8_t nListeners;
-    ButtonListener* listeners[MAX_LISTENERS];  
+    ButtonListener* listener;  
+    uint16_t timestamp;
 };
 
 #endif

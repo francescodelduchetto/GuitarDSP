@@ -4,42 +4,48 @@
 
 #include <stdint.h>
 #include "ButtonImpl.h"
+#include "Counter.h"
+#include "Dispatcher.h"
 
 #define AUDIO_PIN (1 << 0)
-volatile uint16_t sample;
+#define N_BUTTON 8
 
-volatile uint16_t i = 0;
+volatile uint16_t i = 0, j = 0, count = 0;
+volatile uint16_t timeStamp[2];
 
-//uint8_t packet[4] = {255, 255};
+ButtonImpl *button[N_BUTTON];
+Counter *counter;
+Dispatcher *dispatcher;
 
-class MyListener : public ButtonListener {
-public:
-    MyListener() {
-        count = 0;
-    }
-
-    void notifyButtonPressed() {
-        count++;
-    }
-
-    int getCount() {
-        cli();
-        int c = count;
-        sei();
-        return c;
-    }
-
-private:
-    volatile int count;
-};
-
-Button *button_a, *button_b;
-MyListener *listener;
-
-void setup(void) {
+void setup() {
     Serial.begin(2000000);
-    // ------- INTERRUPTS -----
-
+    
+    // ------- COUNTER INTERRUPT -----
+	TCCR0A = 0;// set entire TCCR0A register to 0
+	TCCR0B = 0;// same for TCCR0B
+	TCNT0  = 0;//initialize counter value to 0
+	 // set compare match register for 2khz increments
+	OCR0A = 255;// match register
+	// turn on CTC mode
+	TCCR0A |= (1 << WGM01);
+	// Set CS01 and CS00 bits for 64 prescaler
+	TCCR0B |= (1 << CS02) | (1 << CS00);   
+	// enable timer compare interrupt
+	//~ TIMSK0 |= (1 << OCIE0A);
+	
+	// ------- AUDIO INTERRUPT -----
+	TCCR1A = 0;// set entire TCCR0A register to 0
+	TCCR1B = 0;// same for TCCR0B
+	TCNT1  = 0;//initialize counter value to 0
+	 // set compare match register for 2khz increments
+	OCR1A = 0;// match register
+	// turn on CTC mode
+	TCCR1A |= (1 << WGM11);
+	// Set CS01 and CS00 bits for 64 prescaler
+	TCCR1B |= (1 << CS10) | (1 << CS12);   
+	// enable timer compare interrupt
+	TIMSK1 |= (1 << OCIE1A);
+	
     // ------- ADC -----
     //ADCSRA = 0;
     //ADCSRB = 0;
@@ -52,34 +58,35 @@ void setup(void) {
     //ADCSRA |= (1 << ADIF); // enable interrupts flag 
     //ADCSRA |= (1 << ADEN); // enable ADC
     //ADCSRA |= (1 << ADSC); // start ADC
-
-    button_a = new ButtonImpl(1);
-    button_b = new ButtonImpl(2);
-    listener = new MyListener();
-    button_a->registerListener(listener);
-    button_b->registerListener(listener);
+	
+	dispatcher = new Dispatcher();
+	for (int i=0; i<N_BUTTON; i++) {
+		button[i] = new ButtonImpl(i);
+		button[i]->registerListener(dispatcher);
+	}
 }
 
-// -------------ADC interrupt
-ISR(ADC_vect) {
-    i++;
+// -------------PIN CHANGE interrupt
+ISR(PCINT0_vect) {
+	for (int i=0; i<N_BUTTON; i++) {
+		if (button[i]->isPressed(counter->getValue())) {
+			button[i]->notifyListener();
+		}
+	}
 }
 
-void loop(void) {
-    //Serial.write(bytes, 10);
-    //digitalWrite(13, LOW);
-    //if (sample == 1023 || sample == 0) {
-    //  digitalWrite(13, HIGH);
-    //}
-    //Serial.write(ADCH & 255);
-    //Serial.write(ADCL & 255);
-    
-    
-    //~ uint16_t s = analogRead(A0);
-    //~ Serial.write(255);
-    //~ Serial.write(255); 
-    //~ Serial.write((s >> 8) & 255);
-    //~ Serial.write(s & 255);
-    
-    Serial.println(button_a->isPressed());
+ISR(TIMER0_COMPA_vect) {
+	counter->tick();
+}
+
+ISR(TIMER1_COMPA_vect) {
+	dispatcher->notifyNewSample(analogRead(A0));
+}
+
+void loop() {
+	for (int i=0; i<N_BUTTON; i++) {
+		if (button[i]->isPressed(counter->getValue())) {
+			button[i]->notifyListener();
+		}
+	}
 }
