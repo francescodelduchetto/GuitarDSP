@@ -11,7 +11,7 @@ void setupADC() {
 	  ADCSRB = 0;
 	  
 	  ADMUX |= (1 << REFS0); //set reference voltage
-	  //ADMUX |= (1 << ADLAR); //left align the ADC value- so we can read highest 8 bits from ADCH register only
+	  ADMUX |= (1 << ADLAR); //left align the ADC value- so we can read highest 8 bits from ADCH register only
 	  
 	  ADCSRA |= (1 << ADPS2) | (1 << ADPS1); //set ADC clock with 32 prescaler- 16mHz/32=500kHz
 	  ADCSRA |= (1 << ADATE); //enabble auto trigger
@@ -21,10 +21,18 @@ void setupADC() {
 	 sei(); 
 }
 
+void pciSetup(byte pin) 
+{
+    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group 
+}
+
 void setupButtons() {
 	for (int i=4; i<12; i++) {
 		pinMode(i, INPUT);
 		digitalWrite(i, HIGH);
+		pciSetup(i);
 	}
 }
 
@@ -37,16 +45,27 @@ void setup() {
 ISR(ADC_vect) {
 	values[3] = ADCL;
 	values[2] = ADCH;
-	values[2] |= (buttonPressed << 4);
+	values[3] |= buttonPressed;
+	buttonPressed = 0;
 	Serial.write(values, 4);
 }
 
-void loop() {
-	buttonPressed = 0;
-	for (int i=4; i<12; i++) {	
+ISR (PCINT0_vect) {
+	for (int i=8; i<12; i++) {
 		if (digitalRead(i) == LOW) {
 			buttonPressed = i;
 		}
-	} 
+	}
+}
+
+ISR (PCINT2_vect) {
+	for (int i=4; i<8; i++) {
+		if (digitalRead(i) == LOW) {
+			buttonPressed = i;
+		}
+	}
+}
+
+void loop() { 
 }
 

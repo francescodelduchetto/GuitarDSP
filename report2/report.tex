@@ -5,6 +5,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{tcolorbox}
 \usepackage[binary-units]{siunitx}
+\usepackage{hyperref}
 
 \usepackage{minted}
 
@@ -144,13 +145,28 @@ Ricordando che i pin analogici di Arduino permettono di leggere valori di tensio
 Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad un pin di Arduino ma dobbiamo progettare e costruire un circuito che trasformi il segnale originario in un segnale adeguato per le esigenze del microcontrollore.
 Il circuito deve quindi traslare il segnale nel range 0-5V, centrandolo in 2.5V, e amplificarlo di un fattore circa uguale a 10.
 
-Questo è il circuito che abbiamo progettato su Multisim prima di cablarlo sulla scheda di prototipazione:
+\newpage
+Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://www.ni.com/multisim/i/}} prima di cablarlo sulla scheda di prototipazione:
 
-\includegraphics[width=0.8\textwidth]{screen.png}
+\begin{center}
+\includegraphics[width=0.9\textwidth]{screen.png}
+\end{center}
 
-\texttt{V1} è un oscilloscopio che simula il 
+\texttt{V1} è un oscilloscopio che simula il suono proveniente dalla chitarra.
+\texttt{U3A} è un amplificatore operazionale (modello TLC2727CP) collegato in configurazione invertente la cui tensione in uscita sarà: $$Vout = V2 - \frac{R2}{R1} \cdot V1 $$
+ 
+Le resistenze \texttt{R1} e \texttt{R2} quindi servono per regolare il fattore di amplificazione del segnale d'ingresso. Le resistenze \texttt{R3} ed \texttt{R4} sono usate invece per fare un partitore di tensione ed ottenere i 2.5V per spostare il segnale nel range 0-5V.
 
-\includegraphics[width=0.8\textwidth]{screen2.png}
+I condensatori sono stati usati per tagliare via le frequenze di rumore dal segnale di input.
+
+\vspace{0.2in}
+\newpage
+Nel grafico seguente vediamo in rosso il segnale \texttt{V1} di input e in blu il segnale di output:
+\vspace{0.1in}
+
+\begin{center}
+\includegraphics[width=0.9\textwidth]{screen2.png}
+\end{center}
 
 Descrizione della struttura/comportamento/interazione delle varie parti.
 
@@ -295,8 +311,8 @@ Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio 
 
 \bibitem{delduchetto2014}
   Francesco Del Duchetto,
-  \emph{Nome della relazione},
-  URL dove trovarla,
+  \emph{Guitar Effect Processor in Java},
+  \url{https://drive.google.com/file/d/0B3icasI9ngtyTko4TDZaYjFDNEE/view},
   2014.
 
 \end{thebibliography}
