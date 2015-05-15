@@ -117,11 +117,9 @@ La lettura dell'audio in input è una funzione cardine del nostro sistema perci�
 \subsection{Applicazione degli effetti e riproduzione dell'audio}
 
 \subsection{Modellazione dei pulsanti}
+L'idea iniziale per la realizzazione della pulsantiera era quella di registrare ciascun pin digitale come interrupt attraverso la chiamata \href{http://www.arduino.cc/en/Reference/AttachInterrupt}{\texttt{attachInterrupt()}}. Questo sarebbe stato possibile se avessimo utilizzato \emph{Arduino Due}, che permette di associare un interrupt a tutti i pin; avendo invece un microcontrollore grossomodo equivalente ad Arduino Uno, avevamo la possibilità di usare la funzione \texttt{attachInterrupt()} su al più due pin.
 
-
-
-
-http://www.arduino.cc/en/Reference/AttachInterrupt
+A causa di questa limitazione, abbiamo dovuto trovare una soluzione diversa. È infatti possibile utilizzare interrupt per il cambio di stato dei pin (su tutti i pin) attraverso le \emph{Pin Change Interrupt Requests}\cite{allinterrupts}.
 
 \section{Struttura, comportamento ed interazione delle varie parti}
 
@@ -181,7 +179,7 @@ Utilizzo linguaggi di modellazione appropriati (UML…)
 \section{Test effettuati e discussione}
 
 \subsection{Comunicazione Arduino - PC}
-La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perchè come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema. 
+La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perchè come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema.
 
 I dati che il microcontrollore deve mandare al computer sono:
 \begin{enumerate}
@@ -194,7 +192,7 @@ Il primo testo effettuato e stato quello di non utilizzare nessun protocollo spe
 
 Naturalmente per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale a differenza di \texttt{Serial.print} non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La \texttt{Serial.write} può scrivere come minimo valori di byte quindi per scrivere il sample, grande 10 bit, abbiamo bisogno di scrivere due byte. Per i pulsanti invece, che sono 8, ci basta un byte. In totale dobbiamo scirvere 3 byte.
 
-In che ordine scriveremo i nostri byte? E il byte relativo ai pulsanti lo mandiamo sempre o solo quando registriamo una pressione? L'ordine con cui li scriviamo non fa molta differenza, l'importante è che sia ben definito in modo che il computer sappia come interpretare i dati che arrivano. Quindi diciamo che scriviamo prima i due byte del sample (prima il byte più significativo e poi l'altro) ed infine accodiamo il byte dei pulsanti. 
+In che ordine scriveremo i nostri byte? E il byte relativo ai pulsanti lo mandiamo sempre o solo quando registriamo una pressione? L'ordine con cui li scriviamo non fa molta differenza, l'importante è che sia ben definito in modo che il computer sappia come interpretare i dati che arrivano. Quindi diciamo che scriviamo prima i due byte del sample (prima il byte più significativo e poi l'altro) ed infine accodiamo il byte dei pulsanti.
 Quest'ultimo byte potremmo decidere di mandarlo solo quando serve, però in che modo il computer riesce a capire quando, dopo i due byte del sample, arriva un byte relativo ai pulsanti e non il primo byte del sample successivo? Senza aggiungere degli ulteriori dati di segnalazione il PC non ha modo di scoprirlo. Allora dobbiamo mandare sempre un pacchetto grande 3 byte, dei quali il terzo conterrà il numero del pulsante premuto se ne è stato premuto uno, o un valore stabilito che indica che non c'è nessuno dato relativo ai pulsanti.
 \vspace{0.2in}
 
@@ -209,7 +207,7 @@ Iniziamo con l'analizzare il contenuto dei byte nel nostro pacchetto:
 \begin{tabular}{ccc}
 \textsc{high sample}           & \textsc{low sample}           & \textsc{button}                             \\ \hline
 \multicolumn{1}{|c|}{$0\, 0\, 0\, 0\, 0\, 0\, ?\, ? $} & \multicolumn{1}{c|}{$?\,?\,?\,?\,?\,?\,?\,?$} & \multicolumn{1}{c|}{$0\,0\,0\,0\,?\,?\,?\,?$} \\ \hline
-\multicolumn{3}{c}{$? \in \{0, 1\}$} 
+\multicolumn{3}{c}{$? \in \{0, 1\}$}
 \end{tabular}
 \end{table}
 
@@ -221,22 +219,22 @@ Osservando come è formato il pacchetto notiamo che possiamo eliminare del tutto
 \begin{tabular}{cc}
 \textsc{{\color[HTML]{FE0000}button} + high sample}           & \textsc{low sample}       \\ \hline
 \multicolumn{1}{|c|}{${\color[HTML]{FE0000}?\,?\,?\,?}\, 0\, 0\, ?\, ? $} & \multicolumn{1}{c|}{$?\,?\,?\,?\,?\,?\,?\,?$} \\ \hline
-\multicolumn{2}{c}{$? \in \{0, 1\}$} 
+\multicolumn{2}{c}{$? \in \{0, 1\}$}
 \end{tabular}
 \end{table}
 
 Questo ci permette, come vedremo in seguito, di poter campionare ad una frequenza maggiore.
 \vspace{0.2in}
 
-Per quanto riguarda la sincronizzazione dobbiamo inserire in testa al nostro pacchetto dei bit aggiuntivi che siano univoci all'interno dello stesso, in modo che il ricevente sappia stabilire con certezza, per ogni pacchetto ricevuto, quale sia il primo byte e quale il secondo. 
-Osservando il contenuto del pacchetto possiamo dire che nel primo byte non potremmo mai ottenere il valore 255 (11111111b) dato che ci sono due bit sempre a 0, il secondo byte invece può contenere qualunque valore. A causa del secondo byte dobbiamo inserire due byte di sincronizzazione perchè se ne mettessimo uno potrebbe accadere che il secondo byte (del sample) venga scambiato per esso. 
+Per quanto riguarda la sincronizzazione dobbiamo inserire in testa al nostro pacchetto dei bit aggiuntivi che siano univoci all'interno dello stesso, in modo che il ricevente sappia stabilire con certezza, per ogni pacchetto ricevuto, quale sia il primo byte e quale il secondo.
+Osservando il contenuto del pacchetto possiamo dire che nel primo byte non potremmo mai ottenere il valore 255 (11111111b) dato che ci sono due bit sempre a 0, il secondo byte invece può contenere qualunque valore. A causa del secondo byte dobbiamo inserire due byte di sincronizzazione perchè se ne mettessimo uno potrebbe accadere che il secondo byte (del sample) venga scambiato per esso.
 Quindi inseriamo, in testa al pacchetto originario, due byte di sincronizzazione entrambi con valore 255.
 
 \begin{table}[h]
 \begin{tabular}{cccc}
 \textsc{\color[HTML]{FE0000}sync} & \textsc{\color[HTML]{FE0000}sync} & \textsc{button + high sample} & \textsc{low sample}       \\ \hline
 \multicolumn{1}{|c|}{\color[HTML]{FE0000}$1\,1\,1\,1\, 1\, 1\, 1\, 1 $} &\multicolumn{1}{|c|}{\color[HTML]{FE0000}$1\,1\,1\,1\, 1\, 1\, 1\, 1 $} &\multicolumn{1}{|c|}{${?\,?\,?\,?}\, 0\, 0\, ?\, ? $} & \multicolumn{1}{c|}{$?\,?\,?\,?\,?\,?\,?\,?$} \\ \hline
-\multicolumn{2}{c}{} & \multicolumn{2}{c}{$? \in \{0, 1\}$} 
+\multicolumn{2}{c}{} & \multicolumn{2}{c}{$? \in \{0, 1\}$}
 \end{tabular}
 \end{table}
 
@@ -251,10 +249,10 @@ Notare che nel nostro progetto il frame rate che utilizziamo per aprire una line
 Cercheremo ora di stimare che frequenze riusciamo ad ottenere utilizzando Arduino.
 
 \subsubsection{analogRead}
-Inizialmente abbiamo provato ad implementare il campionamento audio nel modo più immediato, cioè usando la funzione \texttt{analogRead} fornita dalle librerie di Arduino. 
+Inizialmente abbiamo provato ad implementare il campionamento audio nel modo più immediato, cioè usando la funzione \texttt{analogRead} fornita dalle librerie di Arduino.
 Abbiamo subito notato che facendo in questo modo dovevamo impostare, quando richiedevamo la linea di output sul PC, un frame rate di circa \SI{5100}{\hertz} per sentire in uscita un suono coerente con quello suonato.
 
-Facendo un po' di prove abbiamo visto che per leggere un campione, utilizzando \texttt{analogRead}, impieghiamo circa \SI{108}{\micro\second} mentre servono \SI{76}{\micro\second} per scrivere sulla linea seriale un pacchetto di \SI{32}{\bit}. 
+Facendo un po' di prove abbiamo visto che per leggere un campione, utilizzando \texttt{analogRead}, impieghiamo circa \SI{108}{\micro\second} mentre servono \SI{76}{\micro\second} per scrivere sulla linea seriale un pacchetto di \SI{32}{\bit}.
 
 \source{cpp}{write_speed_rel}
 
@@ -307,7 +305,7 @@ La macro \texttt{ISR} marca la funzione come interrupt handler, in questo caso (
 
 Nella funzione noi leggiamo i valori che sono stati campionati dai registri \texttt{ADCL} e \texttt{ADCH}, li inseriamo nel pacchetto e poi li scriviamo sulla seriale. Assumendo che l'operazione più costosa sia la scrittura sulla porta seriale calcoliamo quanto costa scrivere un pacchetto di 4 byte e consideriamo tale valore come lower bound per il costo del nostro interrupt handler.
 
-Il costo per scrivere un pacchetto di 4 byte, che avevamo trovato nel paragrafo precedente, è in media \SI{76}{\micro\second}. Riguardando la tabella nella pagina precedente leggiamo che campionando a \SI{19.23}{\kilo\hertz} l'ADC legge un nuovo sample ogni \SI{52}{\micro\second}. Impostando perciò un prescaler minore di 128 l'ADC non riuscirà a leggere ogni volta che gli tocca perchè, ricordando che l'interrupt handler esegue in sezione critica, l'handler di gestione dura di più del tempo di attesa tra la lettura di un campione e l'altro ed accadrà che a volte questo metterà in attesa l'ADC che vuole leggere un nuovo sample. 
+Il costo per scrivere un pacchetto di 4 byte, che avevamo trovato nel paragrafo precedente, è in media \SI{76}{\micro\second}. Riguardando la tabella nella pagina precedente leggiamo che campionando a \SI{19.23}{\kilo\hertz} l'ADC legge un nuovo sample ogni \SI{52}{\micro\second}. Impostando perciò un prescaler minore di 128 l'ADC non riuscirà a leggere ogni volta che gli tocca perchè, ricordando che l'interrupt handler esegue in sezione critica, l'handler di gestione dura di più del tempo di attesa tra la lettura di un campione e l'altro ed accadrà che a volte questo metterà in attesa l'ADC che vuole leggere un nuovo sample.
 Questo risultato stronca le nostre speranze sul fatto di ottenere una qualità audio vicina a quella dei CD e ci dice che possiamo ottenere una frequenza che si aggira tra i \SI{19.23}{\kilo\hertz} e i \SI{9.61}{\kilo\hertz}. Empiricamente abbiamo trovato \SI{14.1}{\kilo\hertz} circa.
 
 \vspace{0.2in}
@@ -320,6 +318,9 @@ Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio 
   \emph{Guitar Effect Processor in Java},
   \url{https://drive.google.com/file/d/0B3icasI9ngtyTko4TDZaYjFDNEE/view},
   2014.
+
+\bibitem{allinterrupts}
+	\url{http://playground.arduino.cc/Main/PinChangeInterrupt}.
 
 \end{thebibliography}
 
