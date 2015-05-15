@@ -94,7 +94,7 @@ public class Model {
 		try {
 			audioSettings = AudioSettings.getAudioSettings();
 			// (sampleRate, sampleSizeInBits, channels, signed, bigEndian)
-			AudioFormat outFormat = new AudioFormat(14200, 16, 1, true, false); // 9615
+			AudioFormat outFormat = new AudioFormat(13920, 16, 1, true, false); // 9615
 
 			lineOut = AudioSystem.getSourceDataLine(outFormat);
 			lineOut.open(outFormat,

@@ -13,7 +13,7 @@ public class AudioDemultiplexer extends Thread {
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
 
-	private int debug = 0;
+	private int debug = 1;
 	
 	private Model model;
 
@@ -94,17 +94,17 @@ public class AudioDemultiplexer extends Thread {
 				short zero = 1 << 9;
 				
 				// get button value
-				int buttonValue = (b[1] & 0xF0) >> 4;
+				int buttonValue = (b[0] & 0x0F);
 				if (buttonValue != 0) {
 					this.notifyButtonPressed(buttonValue);
 				}
 
 				// Parse shorts from bytes
-				short audio = (short) b[0];
-				audio |= (b[1] & 0x03) << 8;
+//				short audio = (short) b[0];
+//				audio |= (b[1] & 0x03) << 8;
 				
-//				short audio = (short) (b[1]);
-//				audio |= (short) (b[2] << 8);
+				short audio = (short) (b[0] >> 6);
+				audio |= (short) (b[1] << 2);
 
 				if (debug == 2) {
 					System.out.println("audio before = " + audio);
