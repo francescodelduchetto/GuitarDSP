@@ -111,7 +111,13 @@ Come accennato nella sezione precedente, il nostro sistema ha il requisito del n
 
 Dal momento che Arduino risulta essere il collo di bottiglia del sistema, a causa del processore a $16$ MHz, è opportuno scegliere la frequenza più alta alla quale il \textit{producer} è in grado di spedire i dati.
 
+\subsection{Campionamento dell'audio}
+La lettura dell'audio in input è una funzione cardine del nostro sistema perciò abbiamo speso molto tempo nel cercare il modo migliore per campionare l'audio (per approfondimenti guardare nella sezione \textbf{Test effettuati e discussione}). Visto che la lettura dell'audio è una funzione che deve essere eseguita continuamente, e non ad esempio a fronte di uno specifico evento, ed il più velocemente possibile, abbiamo concluso che la soluzione migliore è quella di usare il convertitore analogico digitale montato sulla scheda. Con l'ADC
+
+\subsection{Applicazione degli effetti e riproduzione dell'audio}
+
 \subsection{Modellazione dei pulsanti}
+
 
 
 
