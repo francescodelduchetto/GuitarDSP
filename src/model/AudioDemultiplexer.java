@@ -1,6 +1,5 @@
 package model;
 
-import effects.Effect;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
@@ -14,7 +13,7 @@ public class AudioDemultiplexer extends Thread {
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
 
-	private int debug = 1;
+	private int debug = 0;
 	
 	private Model model;
 
@@ -26,6 +25,9 @@ public class AudioDemultiplexer extends Thread {
 
 	private InputStream input;
 //	private BufferedReader input;
+	
+
+	short[] buffer = new short[] {0, 0, 0};
 
 	public AudioDemultiplexer(String portName, Model model, Controller controller) {
 		this.model = model;
@@ -51,9 +53,7 @@ public class AudioDemultiplexer extends Thread {
 	}
 
 	@Override
-	public final void run() {
-//		short[] window = new short[5];
-		
+	public final void run() {		
 		int[] b = new int[] {
 			-1, -1, -1, -1, -1, -1
 		};
@@ -62,12 +62,11 @@ public class AudioDemultiplexer extends Thread {
 		controller.streamStarted();
 		while (!isStreamStopped) {
 			try {
-				b[5] = b[4];
-				b[4] = b[3];
 				b[3] = b[2];
 				b[2] = b[1];
 				b[1] = b[0];
 				b[0] = input.read();
+//				System.out.println(b[0]);
 //				sample = Integer.parseInt( input.readLine());
 			} catch (Exception e) {
 //				e.printStackTrace();
@@ -83,63 +82,52 @@ public class AudioDemultiplexer extends Thread {
 //			}
 
 			// Check sync bytes
-			if (b[5] != 255 && b[4] == 255 && b[3] == 255) {
-				assert b[2] != 255;
+			if (b[3] == 255 && b[2] == 255 && b[1] != 255) {
 				assert b[1] != 255;
-
-				if (b[0] != 255) {
-					// There are both and audio sample and a button event
-					this.notifyButtonPressed(b[0]);
-				}
-
-//				if (debug == 1) {
-//					System.out.println("b[3] = " + b[3]);
-//					System.out.println("b[4] = " + b[4]);
-//				}
-
-				short zero = 1 << 9;
-
-				// Parse shorts from bytes
-				short audio = (short) (b[2] << 8);
-				audio |= b[1];
+				assert b[0] != 255;
 
 				if (debug == 1) {
+					System.out.println("b[1] = " + b[1]);
+					System.out.println("b[0] = " + b[0]);
+				}
+
+				short zero = 1 << 9;
+				
+				// get button value
+				int buttonValue = (b[1] & 0xF0) >> 4;
+				if (buttonValue != 0) {
+					this.notifyButtonPressed(buttonValue);
+				}
+
+				// Parse shorts from bytes
+				short audio = (short) b[0];
+				audio |= (b[1] & 0x03) << 8;
+				
+//				short audio = (short) (b[1]);
+//				audio |= (short) (b[2] << 8);
+
+				if (debug == 2) {
 					System.out.println("audio before = " + audio);
 				}
-//				if (Math.abs(audio - prev_audio) > 40) {
-//					audio = prev_audio;
-//				}
-//				prev_audio = audio;
 
 				audio -= zero;
 
-				if (debug == 1) {
-//					System.out.println("audio between = " + audio);
+				if (debug == 2) {
+					System.out.println("audio between = " + audio);
 				}
 
 				audio *= 1 << 6;
 
-//				window[4] = window[3];
-//				window[3] = window[2];
-//				window[2] = window[1];
-//				window[1] = window[0];
-//				window[0] = audio;
-//				
-//				int sum = 0;
-//				for (int x: window){
-//					sum += x;
-//				}
-//				audio = (short) (sum / window.length);
-
-				if (debug == 1) {
+				if (debug == 2) {
 					System.out.println("audio after = " + audio);
 				}
+				
+				audio = (short) ((buffer[0] + buffer[1] + audio) / 3);
+				buffer[0] = buffer[1];
+				buffer[1] = audio;
 
 				/* update mixer */
 				this.model.getMixer().audioEvent(audio);
-
-				/* Update the graph */
-				this.controller.updateGraph(audio);
 			}
 		}
 	}
@@ -148,18 +136,12 @@ public class AudioDemultiplexer extends Thread {
 		this.isStreamStopped = true;
 		this.serialPort.close();
 		this.controller.streamStopped();
-	}
-
-	private void notifyEffects(short touchX, short touchY, short pressure) {
-		/* Update effects */
-		if (touchX != -1)
-			for (Effect effect : this.model.getEffects()) {
-				effect.touchpadEvent(touchX, touchY, pressure);
-			}
+		System.out.println("################ CLOSED  #################");
 	}
 	
 	private void notifyButtonPressed(int button) {
 		System.out.println("Premuto pulsante: " + button);
+		this.model.getMixer().buttonPressed(7 - (button - 4)); // valori da 0 a 7
 	}
 
 }

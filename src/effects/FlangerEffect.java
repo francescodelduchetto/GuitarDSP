@@ -28,12 +28,12 @@ public class FlangerEffect implements Effect {
 	/**
 	 * Maximum value of the excursion {@link InputParameter}.
 	 */
-	private static final Integer MAX_EXCURSION = 1000;
+	private static final Integer MAX_EXCURSION = 500;
 
 	/**
 	 * Initial value of the excursion {@link InputParameter}.
 	 */
-	private static final Integer INITIAL_EXCURSION = 500;
+	private static final Integer INITIAL_EXCURSION = 250;
 
 	/**
 	 * Controls the depth of the oscillation.
@@ -95,12 +95,6 @@ public class FlangerEffect implements Effect {
 			.getShortBufferLength()];
 
 	/**
-	 * The current buffer.
-	 */
-	private short[] newBuffer = new short[AudioSettings.getAudioSettings()
-			.getShortBufferLength()];
-
-	/**
 	 * Sample rate.
 	 */
 	private int sampleRate;
@@ -114,13 +108,19 @@ public class FlangerEffect implements Effect {
 	}
 
 	@Override
-	public final void process(final short[] audioIn, final int shortsRead) {
-		newBuffer = Arrays.copyOf(audioIn, audioIn.length);
-		for (int i = 0; i < shortsRead; i++) {
-			audioIn[i] = (short) (audioIn[i] * (1 - depth.getValue()) + this
-					.getDelayShort(newBuffer, i) * depth.getValue());
+	public final short process(short audioIn) {
+		short newSample = audioIn;
+		audioIn = (short) (audioIn * (1 - depth.getValue()) + this
+				.getDelayShort(newSample) * depth.getValue());
+		insertNewSample(newSample);
+		return audioIn;
+	}
+	
+	private void insertNewSample(short sample) {
+		for (int i=0; i<previousBuffer.length-1; i++) {
+			previousBuffer[i] = previousBuffer[i+1];
 		}
-		this.previousBuffer = newBuffer;
+		previousBuffer[previousBuffer.length-1] = sample;
 	}
 
 	/**
@@ -130,12 +130,12 @@ public class FlangerEffect implements Effect {
 	 * 		the current position index on the original buffer.
 	 * @return the sample that must be added to the current sample.
 	 */
-	private short getDelayShort(final short[] audioIn, final int n) {
-		int delayIndex = n - getOffsetIndex();
-		if (delayIndex >= 0) {
-			return audioIn[delayIndex];
-		}
-		return previousBuffer[previousBuffer.length + delayIndex];
+	private short getDelayShort(final short audioIn) {
+		int ind = getOffsetIndex();
+//		System.out.println("OffsetIndex: " + ind);
+//		System.out.println("index: " + (previousBuffer.length - ind));
+		
+		return previousBuffer[previousBuffer.length - getOffsetIndex() -1];
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class FlangerEffect implements Effect {
 	 */
 	private int getOffsetIndex() {
 		counter++;
-		return (int) (excursion.getValue() / 2 * Math.abs(Math.sin(2 * Math.PI
+		return (int) (excursion.getValue() * Math.abs(Math.sin(2 * Math.PI
 				* counter * frequency.getValue() / sampleRate)));
 	}
 
@@ -164,11 +164,5 @@ public class FlangerEffect implements Effect {
 
 	@Override
 	public void update(final Observable o, final Object arg) {
-	}
-
-	@Override
-	public void touchpadEvent(int touchX, int touchY, int pressure) {
-		// TODO Auto-generated method stub
-		
 	}
 }

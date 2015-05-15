@@ -38,7 +38,7 @@ public interface Effect extends Observer, Serializable {
 	 * @param shortsRead
 	 *            the length of the input buffer.
 	 */
-	void process(short[] audioIn, int shortsRead);
+	short process(short audioIn);
 
 	/**
 	 * Initialize the effect making it ready to a new streaming.
@@ -50,8 +50,6 @@ public interface Effect extends Observer, Serializable {
 	 */
 	List<InputParameter<? extends Number>> getInputParameters();
 	
-	void touchpadEvent(int touchX, int touchY, int pressure);
-
 	/**
 	 * Annotation that specifies the name of the effect and if it's show-able on
 	 * the view. It allows to get this informations by reflection, so it is not

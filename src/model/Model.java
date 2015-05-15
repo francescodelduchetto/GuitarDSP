@@ -93,7 +93,9 @@ public class Model {
 	public Model(final controller.Controller controller) {
 		try {
 			audioSettings = AudioSettings.getAudioSettings();
-			AudioFormat outFormat = new AudioFormat(5000, 16, 1, true, false); // 307692
+			// (sampleRate, sampleSizeInBits, channels, signed, bigEndian)
+			AudioFormat outFormat = new AudioFormat(14200, 16, 1, true, false); // 9615
+
 			lineOut = AudioSystem.getSourceDataLine(outFormat);
 			lineOut.open(outFormat,
 					audioSettings.getBufferLength());
@@ -101,7 +103,7 @@ public class Model {
 			controller.showErrorDialog("Output line unavailable");
 		}
 		this.controller = controller;
-		this.mixer = new Mixer(lineOut,	inputAttenuation, this);
+		this.mixer = new Mixer(lineOut,	inputAttenuation, this, controller);
 	}
 
 	/**
@@ -118,7 +120,7 @@ public class Model {
 	}
 
 	/**
-	 * @return the {@link List} of effects that are currently utilized.
+	 * @return the {@link List} of effects that are currently used.
 	 */
 	public final List<Effect> getEffects() {
 		return effectsList;

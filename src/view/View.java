@@ -47,6 +47,9 @@ import effects.Effect;
 public class View extends JFrame {
 	private static final long serialVersionUID = 1;
 
+	private static final Color ON_EFFECT_COLOR = new Color(160, 190, 220);
+	
+	private static final Color OFF_EFFECT_COLOR = new Color(228, 140, 130);
 	/**
 	 * Button that start and stop the streaming of the sound.
 	 */
@@ -280,6 +283,22 @@ public class View extends JFrame {
 		}
 		return -1;
 	}
+	
+	public void activeColorEffectPanel(int index) {
+		if (index % 2 == 0) {
+			this.setComponentColor(this.effectsPanel.getComponent(index), ON_EFFECT_COLOR);
+		} else {
+			this.setComponentColor(this.effectsPanel.getComponent(index), new Color(ON_EFFECT_COLOR.getRed() - 20, ON_EFFECT_COLOR.getGreen() - 20, ON_EFFECT_COLOR.getBlue() - 20));
+		}
+	}
+	
+	public void deactiveColorEffectPanel(int index) {
+		if (index % 2 == 0) {
+			this.setComponentColor(this.effectsPanel.getComponent(index), OFF_EFFECT_COLOR);
+		} else {
+			this.setComponentColor(this.effectsPanel.getComponent(index), new Color(OFF_EFFECT_COLOR.getRed() - 20, OFF_EFFECT_COLOR.getGreen() - 20, OFF_EFFECT_COLOR.getBlue() - 20));
+		}
+	}
 
 	/**
 	 * Create and shows a new panel that allows user to controls the effect's
@@ -293,7 +312,9 @@ public class View extends JFrame {
 		this.effectsPanel.add(effectPanel);
 
 		if (getComponentIndex(effectPanel) % 2 == 0) {
-			setComponentColor(effectPanel, new Color(224, 224, 224));
+			setComponentColor(effectPanel, ON_EFFECT_COLOR);
+		} else {
+			setComponentColor(effectPanel, new Color(ON_EFFECT_COLOR.getRed() - 20, ON_EFFECT_COLOR.getGreen() - 20, ON_EFFECT_COLOR.getBlue() - 20));
 		}
 		this.effectsPanel.repaint();
 		this.effectsPanel.revalidate();

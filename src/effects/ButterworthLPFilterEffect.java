@@ -67,17 +67,24 @@ public class ButterworthLPFilterEffect implements Effect {
 	}
 
 	@Override
-	public final void process(final short[] audioIn, final int shortsRead) {
-		for (int i = 0; i < shortsRead; i++) {
+	public final short process(short audioIn) {
+//		System.out.println("primo: " +(double) audioIn / Short.MAX_VALUE);
+//		for (int i = 0; i < shortsRead; i++) {
 			xv[2] = xv[1];
 			xv[1] = xv[0];
-			xv[0] = (double) (audioIn[i]) / Short.MAX_VALUE;
+			xv[0] = (double) (audioIn) / Short.MAX_VALUE;
 			yv[2] = yv[1];
 			yv[1] = yv[0];
 			yv[0] = ax[0] * xv[0] + ax[1] * xv[1] + ax[2] * xv[2] - by[1]
 					* yv[0] - by[2] * yv[1];
-			audioIn[i] = (short) (yv[0] * Short.MAX_VALUE);
-		}
+//			System.out.println("yv: " + yv[0]);
+//			System.out.println("ax0: " + ax[0]);
+//			System.out.println("ax1: " + ax[1]);
+//			System.out.println("ax2: " + ax[2]);
+//			System.out.println("by1: " + by[1]);
+//			System.out.println("by2: " + by[2]);
+			return (short) (yv[0] * Short.MAX_VALUE);
+//		}
 	}
 
 	@Override
@@ -96,7 +103,7 @@ public class ButterworthLPFilterEffect implements Effect {
 		if (source.equals(cutoff)) {
 			// Find cutoff frequency in [0..PI]
 			double qcRaw = (2 * Math.PI * cutoff.getValue())
-					/ AudioSettings.getAudioSettings().getSampleRate();
+					/ 3910;
 			double qcWarp = Math.tan(qcRaw); // Warp cutoff frequency
 			double sqrt2 = Math.sqrt(2);
 			double gain = 0;
@@ -110,11 +117,5 @@ public class ButterworthLPFilterEffect implements Effect {
 				ax[2] = 1 * gain;
 			}
 		}
-	}
-
-	@Override
-	public void touchpadEvent(int touchX, int touchY, int pressure) {
-		// TODO Auto-generated method stub
-		
 	}
 }

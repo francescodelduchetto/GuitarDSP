@@ -57,17 +57,16 @@ public class OverdriveEffect implements Effect {
 	private double x;
 
 	@Override
-	public final void process(final short[] audioIn, final int shortsRead) {
+	public final short process(short audioIn) {
 		if (drive.getValue() != 0) {
-			for (int i = 0; i < shortsRead; i++) {
-				x = (double) (audioIn[i]) / Short.MAX_VALUE;
-				a = Math.sin(drive.getValue() * Math.PI / 2);
-				k = 2 * a / (1 - a);
-				x = (1 + k) * x / (1 + k * Math.abs(x));
-				audioIn[i] = (short) (x * Short.MAX_VALUE);
-			}
-			LPFILTER.process(audioIn, shortsRead);
+			x = (double) (audioIn) / Short.MAX_VALUE;
+			a = Math.sin(drive.getValue() * Math.PI / 2);
+			k = 2 * a / (1 - a);
+			x = (1 + k) * x / (1 + k * Math.abs(x));
+			audioIn = (short) (x * Short.MAX_VALUE);
+			LPFILTER.process(audioIn);
 		}
+		return audioIn;
 	}
 
 	@Override
@@ -84,11 +83,5 @@ public class OverdriveEffect implements Effect {
 
 	@Override
 	public void update(final Observable o, final Object arg) {
-	}
-
-	@Override
-	public void touchpadEvent(int touchX, int touchY, int pressure) {
-		// TODO Auto-generated method stub
-		
 	}
 }

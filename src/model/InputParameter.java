@@ -33,6 +33,11 @@ import javax.swing.JSlider;
 public class InputParameter<N extends Number> extends Observable implements Serializable {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 880512297642181645L;
+
+	/**
 	 * The name of the parameter.
 	 */
 	private String name;

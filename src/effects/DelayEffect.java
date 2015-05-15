@@ -20,6 +20,11 @@ import model.InputParameter;
 public class DelayEffect implements Effect {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3570200456080405727L;
+
+	/**
 	 * Minimun value of the delayLength {@link InputParameter}.
 	 */
 	private static final Integer MIN_DELAY_LENGTH = 0;
@@ -48,8 +53,7 @@ public class DelayEffect implements Effect {
 	/**
 	 * The buffer of audio processed.
 	 */
-	private short[] audioResponse = new short[AudioSettings.getAudioSettings()
-			.getShortBufferLength()];
+	private short audioResponse;
 
 	/**
 	 * Construct a {@link DelayEffect}.
@@ -59,11 +63,9 @@ public class DelayEffect implements Effect {
 	}
 
 	@Override
-	public final void process(final short[] audioIn, final int shortsRead) {
-		audioResponse = delayLine.getReponse(audioIn, shortsRead);
-		for (int i = 0; i < shortsRead; i++) {
-			audioIn[i] += audioResponse[i];
-		}
+	public final short process(short audioIn) {
+		audioResponse = delayLine.getReponse(audioIn);
+		return (short) (audioIn + audioResponse);
 	}
 
 	@Override
@@ -82,11 +84,5 @@ public class DelayEffect implements Effect {
 	@Override
 	public final void update(final Observable o, final Object arg) {
 		delayLine.emptyDelayBuffer();
-	}
-
-	@Override
-	public void touchpadEvent(int touchX, int touchY, int pressure) {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -1,6 +1,8 @@
 #include "Dispatcher.h"
 #include "Arduino.h"
 
+#define DEBUG 0
+
 Dispatcher::Dispatcher() {
 	this->packet[0] = this->packet[1] = 255;
 }
@@ -11,22 +13,24 @@ void Dispatcher::notifyButtonPressed(uint8_t pin) {
 }
 
 void Dispatcher::notifyNewSample(uint16_t sample) {
-	this->packet[2] = sample >> 8;
-	this->packet[3] = sample & 255;
+	this->packet[2] = 200;//sample & 255;
+	this->packet[3] = 99;//sample >> 8;
 	if (this->commandAvailable) {
-		//~ Serial.write(this->packet, 5);
 		this->commandAvailable = false;
-		//~ cli();
+#if DEBUG
 		for (int i=0; i<5; i++) {
-			Serial.write((int)this->packet[i]);
+			Serial.println((int)this->packet[i]);
 		}
-		//~ sei();
+#else
+		Serial.write(this->packet, 5);
+#endif
 	} else {
-		//~ Serial.write(this->packet, 4);
-		//~ cli();
+#if DEBUG
 		for (int i=0; i<4; i++) {
-			Serial.write((int)this->packet[i]);
+			Serial.println((int)this->packet[i]);
 		}
-		//~ sei();
+#else
+		Serial.write(this->packet, 4);
+#endif
 	}
 }

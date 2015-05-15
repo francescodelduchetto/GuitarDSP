@@ -3,7 +3,6 @@ package effects;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import model.AudioSettings;
 import model.InputParameter;
 
 /**
@@ -36,9 +35,14 @@ import model.InputParameter;
 public class DelayLine implements Serializable {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3348182715758860788L;
+
+	/**
 	 * Max value of the delay time that can be applied.
 	 */
-	public static final int MAX_DELAY_LENGTH = Short.MAX_VALUE;
+	public static final int MAX_DELAY_LENGTH = 2000;
 
 	/**
 	 * The circular buffer that stores the echoes.
@@ -81,8 +85,7 @@ public class DelayLine implements Serializable {
 	/**
 	 * The buffer that is returned.
 	 */
-	private short[] audioResponse = new short[AudioSettings.getAudioSettings()
-			.getShortBufferLength()];
+	private short audioResponse;
 
 	/**
 	 * Construct a {@code DelayLine}.
@@ -106,20 +109,17 @@ public class DelayLine implements Serializable {
 	 *            the length of the input buffer.
 	 * @return the corresponding echoes for the given buffer.
 	 */
-	public final short[] getReponse(final short[] audioIn, 
-			final int shortsRead) {
+	public final short getReponse(final short audioIn) {
 		if (delayLength.getValue() != 0) {
-			for (int i = 0; i < shortsRead; i++) {
-				audioResponse[i] = delayBuffer[current];
-				delayBuffer[current] += audioIn[i];
-				delayBuffer[current] *= -feedback.getValue();
-				current++;
-				current %= delayLength.getValue();
-			}
+			audioResponse = delayBuffer[current];
+			delayBuffer[current] += audioIn;
+			delayBuffer[current] *= -feedback.getValue();
+			current++;
+			current %= delayLength.getValue();
+			return audioResponse;
 		} else {
-			emptyBuffer(audioResponse);
+			return 0;
 		}
-		return Arrays.copyOf(audioResponse, audioResponse.length);
 	}
 
 	/**

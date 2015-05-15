@@ -148,6 +148,14 @@ public class Controller implements View.ViewObserver {
 			this.graphView = new GraphView();
 		}
 	}
+	
+	public final void deactivateEffect(int index) {
+		view.deactiveColorEffectPanel(index);
+	}
+	
+	public final void activateEffect(int index) {
+		view.activeColorEffectPanel(index);
+	}
 
 	/**
 	 * Update the graph giving the new buffer processed.
