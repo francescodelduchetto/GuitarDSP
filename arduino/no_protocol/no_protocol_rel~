@@ -1,0 +1,10 @@
+#include <stdint.h>
+
+void setup() {
+	Serial.begin(2000000);
+}
+
+void loop() {
+	uint8_t value = 128;
+	Serial.write(value);
+}

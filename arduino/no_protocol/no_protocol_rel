@@ -1,0 +1,4 @@
+void loop() {
+	uint8_t value = 128;
+	Serial.write(value);
+}

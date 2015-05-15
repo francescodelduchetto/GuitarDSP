@@ -1,0 +1,10 @@
+#include <stdint.h>
+
+void setup() {
+	Serial.begin(2000000);
+}
+
+void loop() {
+	uint16_t value = analogRead(A0);
+	Serial.write(value);	
+}
