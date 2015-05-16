@@ -149,6 +149,9 @@ A causa di questa limitazione, abbiamo dovuto trovare una soluzione diversa. È 
     %~ \end{enumerate}
 %~ \end{itemize}
 
+\subsection{Struttura codice Arduino}
+La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguento specifici pattern perchè abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi. 
+
 \subsection{Circuito elettronico}
 Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra 0V e 5V, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
 \begin{itemize}
