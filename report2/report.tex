@@ -326,6 +326,16 @@ Questo risultato stronca le nostre speranze sul fatto di ottenere una qualità a
 \vspace{0.2in}
 Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio nel pacchetto dei valori letti e scrivere sulla seriale nel loop principale. Questo sicuramente permetterà all'ADC di campionare alla frequenza con cui dovrebbe però noi comunque non riusciremmo a mandare sulla seriale tutti i sample letti, per via del tempo necessario alla scrittura. Anzi peggioreremmo la situazione perché dato che l'interrupt handler ha priorità maggiore rispetto a quella del loop, prenderà sempre il controllo mentre il loop sta eseguendo facendo saltare molti campioni. Facendo una prova abbiamo rilevato una frequenza di campionamento di circa \SI{9}{\kilo\hertz}.
 
+\section{Conclusioni}
+Possiamo concludere dicendo che la scheda Arduino Uno, o un suo equivalente, non è adatta per modellare il tipo di applicazione che ci eravamo preposti. Principalmente per due motivi:
+\begin{enumerate}
+	\item le caratteristiche fisiche e strutturali del microcontrollore non permettono di leggere da un pin analogico ad un'alta frequenza senza generate rumore sul segnale letto.
+	\item la frequenza relativamente bassa del processore non permette di sfruttare a pieno la velocità del protocollo usb per la comunicazione, limitando pesantemente la velocità di comunicazione.
+\end{enumerate}
+
+Probabilmente utilizzando un microcontrollore con una CPU più potente e migliori caratteristiche fisiche saremmo riusciti ad ottenere un sistema che rispettasse i nostri requisiti di funzionalità. 
+
+Impiegando invece un microcomputer, come Raspberry PI, avremmo potuto tentare di gestire tutte le funzioni di lettura, elaborazione e riproduzione del suono nel sistema embedded, tagliando quindi via la necessità di comunicare i dati ad un elaboratore esterno ed ottenendo un sistema totalmente autonomo.
 \begin{thebibliography}{9}
 
 \bibitem{delduchetto2014}
