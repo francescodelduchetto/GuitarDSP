@@ -215,17 +215,15 @@ I dati che il microcontrollore deve mandare al computer sono:
 \end{enumerate}
 
 \subsubsection{Comunicazione senza sincronizzazione}
-Il primo testo effettuato e stato quello di non utilizzare nessun protocollo specifico, o meglio mandare i campioni appena raccolti senza aggiungere alcun overhead ai dati. Chiaramente questo approccio è quello che permette la maggior velocità di comunicazione visto che mandiamo solamente i dati utili senza aggiungere nessuna informazione non necessaria.
+Il primo testo effettuato e stato quello di non utilizzare nessun protocollo specifico, o meglio mandare i campioni appena raccolti senza aggiungere alcun dato di sincronizzazione. Chiaramente questo approccio è quello che permette la maggior velocità di comunicazione visto che mandiamo solamente i dati utili senza aggiungere informazioni non necessarie.
 
-Naturalmente per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale a differenza di \texttt{Serial.print} non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La \texttt{Serial.write} può scrivere come minimo valori di byte quindi per scrivere il sample, grande \SI{10}{\bit}, abbiamo bisogno di scrivere due byte. Per i pulsanti invece, che sono 8, ci basta un byte. In totale dobbiamo scrivere \SI{3}{\byte}.
+Per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale, a differenza di \texttt{Serial.print}, non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La funzione \texttt{Serial.write} lavora con risoluzione di \SI{1}{\byte} quindi per scrivere il sample, grande \SI{10}{\bit}, abbiamo bisogno di scrivere \SI{2}{\byte}. Per i pulsanti invece, che sono \num{8}, ci basta \SI{1}{\byte}. In totale dobbiamo scrivere \SI{3}{\byte}.
 
-In che ordine scriveremo i nostri byte? E il byte relativo ai pulsanti lo mandiamo sempre o solo quando registriamo una pressione? L'ordine con cui li scriviamo non fa molta differenza, l'importante è che sia ben definito in modo che il computer sappia come interpretare i dati che arrivano. Quindi diciamo che scriviamo prima i due byte del sample (prima il byte più significativo e poi l'altro) ed infine accodiamo il byte dei pulsanti.
-Quest'ultimo byte potremmo decidere di mandarlo solo quando serve, però in che modo il computer riesce a capire quando, dopo i due byte del sample, arriva un byte relativo ai pulsanti e non il primo byte del sample successivo? Senza aggiungere degli ulteriori dati di segnalazione il PC non ha modo di scoprirlo. Allora dobbiamo mandare sempre un pacchetto grande 3 byte, dei quali il terzo conterrà il numero del pulsante premuto se ne è stato premuto uno, o un valore stabilito che indica che non c'è nessuno dato relativo ai pulsanti.
-\vspace{0.2in}
+A questo punto dobbiamo chiederci in che ordine conviene scrivere questi byte, e se è opportuno mandare ogni volta il byte relativo ai pulsanti o solo quando registriamo una pressione. Notiamo che l'ordine con cui spediamo i dati non fa molta differenza, l'importante è che sia ben definito in modo che il computer sappia come interpretare i dati che arrivano. Quindi diciamo che scriviamo prima i due byte del sample (prima il byte più significativo e poi l'altro) ed infine accodiamo il byte dei pulsanti.
 
-Questa soluzione innanzitutto lascia inutilizzato l'ultimo byte per quasi tutta la comunicazione dato che il segnale della pressione si verifica molto di rado rispetto ai sample che vengono mandati di continuo. Ma la vera criticità di questo protocollo è che manca del tutto la sincronizzazione tra mittente e destinatario. Anche assumendo che ogni volta che parte Arduino inizia la comunicazione il computer sia pronto per leggere, e quindi si sincronizza senza errori usando il primo byte arrivato come primo byte di un pacchetto, non è detto che durante la comunicazione questa sincronizzazione non possa essere persa. Se infatti si verificano delle situazioni impreviste (es: Arduino viene riavviato, il cavo si stacca, etc) quando viene ristabilita la comunicazione il primo byte che arriva sulla porta seriale del computer corrisponde al primo byte di un pacchetto? Non è detto. In situazioni del genere il PC continua a leggere e a fare il suo lavoro ignaro del fatto che i dati che sta usando possono non essere quelli corretti.
+Quest'ultimo byte potremmo mandarlo solo quando serve, però introduciamo una complessità dal lato del PC perché quest'ultimo deve capire quando, dopo i \SI{2}{\byte} del sample, arriva \SI{1}{\byte} relativo ai pulsanti e non il primo byte del sample successivo. Senza aggiungere ulteriori dati di sincronizzazione non c'è modo per il PC di indovinarlo. Per questo motivo, dobbiamo mandare sempre un pacchetto grande \SI{3}{\byte}, il terzo dei quali conterrà il numero del pulsante premuto se ne è stato premuto uno, o un valore stabilito che indica che non c'è alcun dato relativo ai pulsanti.
 
-Per avere un sistema fault-tolerant siamo perciò obbligati ad inserire delle informazioni di sincronizzazione aggiuntive al nostro pacchetto.
+Questa soluzione, innanzitutto, lascia inutilizzato l'ultimo byte per quasi tutta la comunicazione dato che il segnale della pressione si verifica molto di rado rispetto ai sample che vengono mandati di continuo. Tuttavia la vera criticità di questo protocollo è che manca del tutto la sincronizzazione tra mittente e destinatario: anche assumendo che ogni volta che Arduino avvia la comunicazione il computer sia pronto per leggere (e quindi si sincronizza senza errori usando il primo byte arrivato come primo byte di un pacchetto), non è detto che durante la comunicazione questa sincronizzazione non possa perdersi. Se infatti si verificano delle situazioni impreviste (ad esempio Arduino viene riavviato, il cavo si stacca, e così via) quando viene ristabilita la comunicazione non è detto che il primo byte che arriva sulla porta seriale del computer corrisponda al primo byte di un pacchetto. In situazioni del genere il PC continua a leggere e a fare il suo lavoro ignaro del fatto che i byte che sta usando potrebbero non essere nell'ordine corretto. Per avere un sistema fault-tolerant siamo perciò obbligati ad inserire delle informazioni di sincronizzazione aggiuntive al nostro pacchetto.
 
 \subsubsection{Comunicazione con sincronizzazione}
 Iniziamo con l'analizzare il contenuto dei byte nel nostro pacchetto:
@@ -312,9 +310,9 @@ La seguente tabella mostra i valori che possiamo scegliere con le relative frequ
 \end{tabular}
 \end{table}
 
-Il valore $13$ che divide ulteriormente la frequenza è il numero di cicli (del clock dell'ADC) che il convertitore impiega per leggere un nuovo valore.
+Il valore \num{13} che divide ulteriormente la frequenza è il numero di cicli di clock dell'ADC che il convertitore impiega per leggere un nuovo valore.
 
-Osserviamo che riusciamo ad ottenere frequenze molto alte, anche molto più di quello di cui abbiamo bisogno. Questo risultato ci potrebbe portare a scegliere il valore minimo per il prescaler al fine di ottenere una qualità altissima dell'audio. Purtroppo non è tutt'oro quel che luccica perché dobbiamo considerare che aumentando la frequenza cresce il "rumore" nei valori letti sul pin e quindi invece di migliorare la qualità del suono la peggioreremmo. In ogni caso a noi va più che bene un prescaler uguale a 32 che ci da una qualità molto vicina a quella dei CD audio.
+Osserviamo che riusciamo ad ottenere frequenze molto alte, anche molto più di quello di cui abbiamo bisogno. Questo risultato ci potrebbe portare a scegliere il valore minimo per il prescaler al fine di ottenere una qualità altissima dell'audio. Purtroppo non è tutt'oro quel che luccica perché dobbiamo considerare che aumentando la frequenza cresce il ``rumore'' nei valori letti sul pin e quindi invece di migliorare la qualità del suono la peggioreremmo. In ogni caso a noi va più che bene un prescaler uguale a \num{32} che ci da una qualità molto vicina a quella dei CD audio.
 
 Ora dobbiamo però tener conto di un altro fattore che potrebbe limitare la nostra velocità di campionamento: la comunicazione seriale.
 Come detto in precedenza i dati raccolti con Arduino devono essere spediti al computer tramite il cavo seriale, quindi se non riusciamo a mandare in tempo tutti i dati che leggiamo siamo comunque costretti ad abbassare la frequenza dell'ADC.
@@ -333,6 +331,17 @@ Questo risultato stronca le nostre speranze sul fatto di ottenere una qualità a
 \vspace{0.2in}
 Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio nel pacchetto dei valori letti e scrivere sulla seriale nel loop principale. Questo sicuramente permetterà all'ADC di campionare alla frequenza con cui dovrebbe però noi comunque non riusciremmo a mandare sulla seriale tutti i sample letti, per via del tempo necessario alla scrittura. Anzi peggioreremmo la situazione perché dato che l'interrupt handler ha priorità maggiore rispetto a quella del loop, prenderà sempre il controllo mentre il loop sta eseguendo facendo saltare molti campioni. Facendo una prova abbiamo rilevato una frequenza di campionamento di circa \SI{9}{\kilo\hertz}.
 
+\section{Documentazione fotografica dei passaggi svolti}
+\includegraphics[width=\textwidth]{foto_1.jpg}
+\includegraphics[width=\textwidth]{foto_2.jpg}
+\includegraphics[width=\textwidth]{foto_3.jpg}
+\includegraphics[width=\textwidth]{foto_4.jpg}
+\includegraphics[width=\textwidth]{foto_5.jpg}
+\includegraphics[width=\textwidth]{foto_6.jpg}
+
+\subsection{Video dimostrativo dell'utilizzo del software}
+\includegraphics[width=\textwidth]{foto_7.jpg}
+
 \begin{thebibliography}{9}
 
 \bibitem{delduchetto2014}
@@ -343,7 +352,7 @@ Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio 
 
 \bibitem{allinterrupts}
 	\url{http://playground.arduino.cc/Main/PinChangeInterrupt},
-	
+
 \bibitem{arduinoinput}
 	\url{http://www.instructables.com/id/Arduino-Audio-Input}.
 
