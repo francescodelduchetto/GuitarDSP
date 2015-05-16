@@ -94,6 +94,23 @@ I requisiti globali del sistema sono:
     \item Riuscire a gestire una comunicazione efficiente tra le entità.
 \end{itemize}
 
+Possiamo separare logicamente i requisiti del sistema in due sottosistemi:
+\begin{itemize}
+    \item Sottosistema \textsc{Chitarra-Pulsantiera-Arduino}:
+    \begin{enumerate}
+        \item Lettura continua dell'audio analogico e campionamento, evitando il più possibile di perdere qualità.
+        \item Rilevazione della pressione (asincrona) dei pulsanti.
+        \item Spedizione di tutti i dati raccolti tramite l'uscita seriale in modo che arrivino integri al destinatario.
+    \end{enumerate}
+    \item Sottosistema \textsc{Computer}:
+    \begin{enumerate}
+        \item Lettura dei dati in arrivo sulla porta USB ``distinguendo'' i dati audio da quelli relativi ai pulsanti.
+        \item Elaborazione del suono e applicazione gli effetti.
+        \item Modifica della pila di effetti da applicare, in base ai pulsanti premuti.
+        \item Invio del suono elaborato sulla linea di output.
+    \end{enumerate}
+\end{itemize}
+
 Tutti questi compiti devono essere svolti in modo da rendere usabile il sistema, quindi la latenza tra il suono prodotto dalla chitarra e quello in uscita dal PC non deve essere percettibile e il suono deve essere fedele e coerente con gli effetti selezionati.
 
 \section{Architettura complessiva del sistema}
@@ -133,21 +150,6 @@ A causa di questa limitazione, abbiamo dovuto trovare una soluzione diversa. È 
 
 \section{Struttura, comportamento ed interazione delle varie parti}
 
-%~ \begin{itemize}
-    %~ \item Sottosistema \textsc{Chitarra-Pulsantiera-Arduino}:
-    %~ \begin{enumerate}
-        %~ \item Lettura continua dell'audio analogico e campionamento, evitando il più possibile di perdere qualità.
-        %~ \item Rilevazione della pressione (asincrona) dei pulsanti.
-        %~ \item Spedizione di tutti i dati raccolti tramite l'uscita seriale in modo che arrivino integri al destinatario.
-    %~ \end{enumerate}
-    %~ \item Sottosistema \textsc{Computer}:
-    %~ \begin{enumerate}
-        %~ \item Lettura dei dati in arrivo sulla porta USB ``distinguendo'' i dati audio da quelli relativi ai pulsanti.
-        %~ \item Elaborazione del suono e applicazione gli effetti.
-        %~ \item Modifica della pila di effetti da applicare, in base ai pulsanti premuti.
-        %~ \item Invio del suono elaborato sulla linea di output.
-    %~ \end{enumerate}
-%~ \end{itemize}
 
 \subsection{Struttura codice Arduino}
 La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguento specifici pattern perchè abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi. 
@@ -169,16 +171,15 @@ Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://ww
 \includegraphics[width=0.9\textwidth]{screen.png}
 \end{center}
 
-\texttt{V1} è un oscilloscopio che simula il suono proveniente dalla chitarra.
-\texttt{U3A} è un amplificatore operazionale (modello TLC2727CP) collegato in configurazione invertente la cui tensione in uscita sarà: $$Vout = V2 - \frac{R2}{R1} \cdot V1 $$
+$V_1$ è un oscilloscopio che simula il suono proveniente dalla chitarra. \texttt{U3A} è un amplificatore operazionale (modello \texttt{TLC2727CP}) collegato in configurazione invertente la cui tensione in uscita sarà: $$V_{\mathrm{out}} = V_2 - \frac{R_2}{R_1} \cdot V_1$$
 
-Le resistenze \texttt{R1} e \texttt{R2} quindi servono per regolare il fattore di amplificazione del segnale d'ingresso. Le resistenze \texttt{R3} ed \texttt{R4} sono usate invece per fare un partitore di tensione ed ottenere i 2.5V per spostare il segnale nel range 0-5V.
+Le resistenze $R_1$ e $R_2$ quindi servono per regolare il fattore di amplificazione del segnale d'ingresso. Le resistenze $R_3$ ed $R_4$ sono usate invece per fare un partitore di tensione ed ottenere i \SI{2.5}{\volt} per spostare il segnale nel range \num{0}-\SI{5}{\volt}.
 
 I condensatori sono stati usati per tagliare via le frequenze di rumore dal segnale di input.
 
 \vspace{0.2in}
 \newpage
-Nel grafico seguente vediamo in rosso il segnale \texttt{V1} di input e in blu il segnale di output:
+Nel grafico seguente vediamo in rosso il segnale $V_1$ di input e in blu il segnale di output:
 \vspace{0.1in}
 
 \begin{center}
@@ -192,8 +193,8 @@ La comunicazione tra Arduino e il computer è stato un punto chiave del nostro p
 
 I dati che il microcontrollore deve mandare al computer sono:
 \begin{enumerate}
-    \item 10 bit dei sample (valori tra 0 e 1024);
-    \item notifica della pressione di un pulsante.
+    \item \SI{10}{\bit} di sample (valori tra \num{0} e \num{1024});
+    \item Indice del pulsante premuto (\num{0} per indicare ``nessuno'').
 \end{enumerate}
 
 \subsubsection{Comunicazione senza sincronizzazione}
