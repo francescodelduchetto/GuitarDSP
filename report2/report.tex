@@ -167,7 +167,14 @@ Sottosistema \textsc{Computer}:
 \includegraphics[width=\textwidth]{stati2.pdf}
 
 \subsection{Struttura codice Arduino}
-La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguendo specifici pattern perché abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi.
+La parte di codice embedded sul microcontrollore non è strutturata in classi perché abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenata esclusivamente dagli interrupt (\emph{interrupt driven}). Nello specifico, abbiamo:
+\begin{itemize}
+	\item Un interrupt sincrono che viene chiamato dall'ADC non appena è disponibile un nuovo campione da leggere
+	\item Un interrupt asincrono che viene invocato a fronte della pressione di uno dei pulsanti \texttt{D0, D1, \dots, D7} sulla scheda.
+	\item Un interrupt asincrono che viene invocato a fronte della pressione di uno dei pulsanti \texttt{D8, D9, \dots, D13} sulla scheda.
+\end{itemize}
+
+La struttura quindi può essere vista come quella di un sistema ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi.
 
 \subsection{Circuito elettronico}
 Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra \SI{0}{\volt} e \SI{5}{\volt}, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
@@ -198,7 +205,7 @@ Nel grafico seguente vediamo in rosso il segnale $V_1$ di input e in blu il segn
 \includegraphics[width=0.9\textwidth]{screen2.png}
 \end{center}
 
-\subsection{Comunicazione Arduino - PC}
+\subsection{Comunicazione Arduino-PC}
 La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perché come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema.
 
 I dati che il microcontrollore deve mandare al computer sono:
