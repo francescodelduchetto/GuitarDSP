@@ -49,7 +49,7 @@ Nella sezione conclusiva della relazione, l'autore di GuitarDSP si proponeva di 
 Il software GuitarDSP, essendo sviluppato nell'ambito di un corso di programmazione ad oggetti, implicava la trattazione di aspetti relativi alla buona progettazione del software, al riuso dei componenti, e così via. In questo caso invece, per un elaborato di sistemi embedded, gli aspetti salienti trattati sono:
 \begin{itemize}
 \item La conversione analogico-digitale: la chitarra produce in uscita un segnale elettrico analogico, che dobbiamo interpretare misurandone la tensione.
-\item La comunicazione tra arduino e il PC che elabora gli effetti.
+\item La comunicazione tra Arduino e il PC che elabora gli effetti.
 \item La gestione delle problematiche di un sistema \textit{near real time}.
 \item La codifica e decodifica di unità di informazione (che contengono il sample audio e il pulsante premuto).
 \end{itemize}
@@ -126,7 +126,7 @@ Nel nostro caso, per garantire un'alta qualità dell'audio, il producer deve gen
 
 Come accennato nella sezione precedente, il nostro sistema ha il requisito del near real time. È intuitivo quindi capire che la soluzione al problema del produttore/consumatore è, nel nostro caso specifico, quella di \textit{concordare una frequenza} comune ad entrambi in modo da affaticare il meno possibile il buffer condiviso.
 
-Dal momento che Arduino risulta essere il collo di bottiglia del sistema, a causa del processore a $16$ MHz, è opportuno scegliere la frequenza più alta alla quale il \textit{producer} è in grado di spedire i dati.
+Dal momento che Arduino risulta essere il collo di bottiglia del sistema, a causa del processore a \SI{16}{\mega\hertz}, è opportuno scegliere la frequenza più alta alla quale il \textit{producer} è in grado di spedire i dati.
 
 \subsection{Campionamento dell'audio}
 La lettura dell'audio in input è una funzione cardine del nostro sistema perciò abbiamo speso molto tempo nel cercare il modo migliore per campionare l'audio (per approfondimenti guardare nella sezione \textbf{Test effettuati e discussione}).
@@ -141,7 +141,7 @@ Abbiamo perciò deciso di utilizzare il convertitore digitale analogico (ADC) pr
 Come spiegato più avanti nella sezione di test, siamo comunque limitati nella frequenza di campionamento per via del tempo di scrittura del valore sulla seriale e del rumore sul che si verifica quando leggiamo velocemente. La velocità massima che abbiamo ottenuto si aggira intorno ai \SI{14}{\kilo\hertz}, ma comunque non siamo riusciti ad ottenere un suono del tutto primo di interferenze.
 
 \subsection{Applicazione degli effetti e riproduzione dell'audio}
-La parte di elaborazione del suono e riproduzione è stata demandata ad un computer, che a differenza della scheda Arudino Uno riesce a gestire questi compiti più onerosi computazionalmente. L'applicazione originale GuitarDSP è stato modificato affinchè fosse in grado di leggere uno strem di byte dalla porta seriale. In oltre è stata implementata la possibilità di spegnimento/accensione degli effetti selezionati utilizzando i pulsanti presenti sulla chitarra. La parte di riproduzione del segnale audio è stata lasciata invariata a parte la scelta della frequenza con cui aprire la linea audio, la quale dovrebbe essere uguale alla frequenza di campionamento.
+La parte di elaborazione del suono e riproduzione è stata demandata ad un computer, che a differenza della scheda Arduino Uno riesce a gestire questi compiti più onerosi computazionalmente. L'applicazione originale GuitarDSP è stato modificato affinché fosse in grado di leggere uno stream di byte dalla porta seriale. In oltre è stata implementata la possibilità di spegnimento/accensione degli effetti selezionati utilizzando i pulsanti presenti sulla chitarra. La parte di riproduzione del segnale audio è stata lasciata invariata a parte la scelta della frequenza con cui aprire la linea audio, la quale dovrebbe essere uguale alla frequenza di campionamento.
 
 \subsection{Modellazione dei pulsanti}
 L'idea iniziale per la realizzazione della pulsantiera era quella di registrare ciascun pin digitale come interrupt attraverso la chiamata \href{http://www.arduino.cc/en/Reference/AttachInterrupt}{\texttt{attachInterrupt()}}. Questo sarebbe stato possibile se avessimo utilizzato \emph{Arduino Due}, che permette di associare un interrupt a tutti i pin; avendo invece un microcontrollore grossomodo equivalente ad Arduino Uno, avevamo la possibilità di usare la funzione \texttt{attachInterrupt()} su al più due pin.
@@ -166,7 +166,7 @@ Sottosistema \textsc{Computer}:
 \includegraphics[width=\textwidth]{stati2.pdf}
 
 \subsection{Struttura codice Arduino}
-La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguento specifici pattern perchè abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi.
+La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguendo specifici pattern perché abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi.
 
 \subsection{Circuito elettronico}
 Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra \SI{0}{\volt} e \SI{5}{\volt}, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
@@ -175,8 +175,7 @@ Ricordando che i pin analogici di Arduino permettono di leggere valori di tensio
     \item Il segnale in uscita dalla chitarra non essendo amplificato assume valori di picco dell'ordine dei \SI{200}{\milli\volt}, rendendo difficile ricostruire con precisione il segnale.
 \end{itemize}
 
-Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad un pin di Arduino ma dobbiamo progettare e costruire un circuito che trasformi il segnale originario in un segnale adeguato per le esigenze del microcontrollore.
-Il circuito deve quindi traslare il segnale nel range 0-5V, centrandolo in 2.5V, e amplificarlo di un fattore circa uguale a 10.
+Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad un pin di Arduino ma dobbiamo progettare e costruire un circuito che trasformi il segnale originario in un segnale adeguato per le esigenze del microcontrollore. Il circuito deve quindi traslare il segnale nel range \num{0}-\SI{5}{\volt}, centrandolo in \SI{2.5}{\volt}, e amplificarlo di un fattore circa uguale a \num{10}.
 
 Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://www.ni.com/multisim}} prima di cablarlo sulla scheda di prototipazione:
 
@@ -198,21 +197,19 @@ Nel grafico seguente vediamo in rosso il segnale $V_1$ di input e in blu il segn
 \includegraphics[width=0.9\textwidth]{screen2.png}
 \end{center}
 
-
-
 \subsection{Comunicazione Arduino - PC}
-La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perchè come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema.
+La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perché come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema.
 
 I dati che il microcontrollore deve mandare al computer sono:
 \begin{enumerate}
-    \item \SI{10}{\bit} di sample (valori tra \num{0} e \num{1024});
+    \item \SI{10}{\bit} di sample (valori tra \num{0} e \num{1024}).
     \item Indice del pulsante premuto (\num{0} per indicare ``nessuno'').
 \end{enumerate}
 
 \subsubsection{Comunicazione senza sincronizzazione}
 Il primo testo effettuato e stato quello di non utilizzare nessun protocollo specifico, o meglio mandare i campioni appena raccolti senza aggiungere alcun overhead ai dati. Chiaramente questo approccio è quello che permette la maggior velocità di comunicazione visto che mandiamo solamente i dati utili senza aggiungere nessuna informazione non necessaria.
 
-Naturalmente per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale a differenza di \texttt{Serial.print} non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La \texttt{Serial.write} può scrivere come minimo valori di byte quindi per scrivere il sample, grande 10 bit, abbiamo bisogno di scrivere due byte. Per i pulsanti invece, che sono 8, ci basta un byte. In totale dobbiamo scirvere 3 byte.
+Naturalmente per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale a differenza di \texttt{Serial.print} non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La \texttt{Serial.write} può scrivere come minimo valori di byte quindi per scrivere il sample, grande \SI{10}{\bit}, abbiamo bisogno di scrivere due byte. Per i pulsanti invece, che sono 8, ci basta un byte. In totale dobbiamo scrivere \SI{3}{\byte}.
 
 In che ordine scriveremo i nostri byte? E il byte relativo ai pulsanti lo mandiamo sempre o solo quando registriamo una pressione? L'ordine con cui li scriviamo non fa molta differenza, l'importante è che sia ben definito in modo che il computer sappia come interpretare i dati che arrivano. Quindi diciamo che scriviamo prima i due byte del sample (prima il byte più significativo e poi l'altro) ed infine accodiamo il byte dei pulsanti.
 Quest'ultimo byte potremmo decidere di mandarlo solo quando serve, però in che modo il computer riesce a capire quando, dopo i due byte del sample, arriva un byte relativo ai pulsanti e non il primo byte del sample successivo? Senza aggiungere degli ulteriori dati di segnalazione il PC non ha modo di scoprirlo. Allora dobbiamo mandare sempre un pacchetto grande 3 byte, dei quali il terzo conterrà il numero del pulsante premuto se ne è stato premuto uno, o un valore stabilito che indica che non c'è nessuno dato relativo ai pulsanti.
@@ -233,7 +230,7 @@ Iniziamo con l'analizzare il contenuto dei byte nel nostro pacchetto:
 \end{tabular}
 \end{table}
 
-I primi 16 bit del pacchetto (che rappresentano il sample) sono composti sempre da 6 zeri seguiti da 10 cifre qualunque. Il terzo byte è invece formato da 4 zeri seguiti da 4 valori qualunque, perchè i pulsanti sono 8 e 4 bit bastano per scrivere i numeri da 0 a 8.
+I primi 16 bit del pacchetto (che rappresentano il sample) sono composti sempre da 6 zeri seguiti da 10 cifre qualunque. Il terzo byte è invece formato da 4 zeri seguiti da 4 valori qualunque, perché i pulsanti sono 8 e 4 bit bastano per scrivere i numeri da 0 a 8.
 
 Osservando come è formato il pacchetto notiamo che possiamo eliminare del tutto il terzo byte, inserendo i 4 bit utili per l'informazione nello spazio libero del primo byte.
 
@@ -249,7 +246,7 @@ Questo ci permette, come vedremo in seguito, di poter campionare ad una frequenz
 \vspace{0.2in}
 
 Per quanto riguarda la sincronizzazione dobbiamo inserire in testa al nostro pacchetto dei bit aggiuntivi che siano univoci all'interno dello stesso, in modo che il ricevente sappia stabilire con certezza, per ogni pacchetto ricevuto, quale sia il primo byte e quale il secondo.
-Osservando il contenuto del pacchetto possiamo dire che nel primo byte non potremmo mai ottenere il valore 255 (11111111b) dato che ci sono due bit sempre a 0, il secondo byte invece può contenere qualunque valore. A causa del secondo byte dobbiamo inserire due byte di sincronizzazione perchè se ne mettessimo uno potrebbe accadere che il secondo byte (del sample) venga scambiato per esso.
+Osservando il contenuto del pacchetto possiamo dire che nel primo byte non potremmo mai ottenere il valore 255 (11111111b) dato che ci sono due bit sempre a 0, il secondo byte invece può contenere qualunque valore. A causa del secondo byte dobbiamo inserire due byte di sincronizzazione perché se ne mettessimo uno potrebbe accadere che il secondo byte (del sample) venga scambiato per esso.
 Quindi inseriamo, in testa al pacchetto originario, due byte di sincronizzazione entrambi con valore 255.
 
 \begin{table}[h]
@@ -309,7 +306,7 @@ La seguente tabella mostra i valori che possiamo scegliere con le relative frequ
 
 Il valore $13$ che divide ulteriormente la frequenza è il numero di cicli (del clock dell'ADC) che il convertitore impiega per leggere un nuovo valore.
 
-Osserviamo che riusciamo ad ottenere frequenze molto alte, anche molto più di quello di cui abbiamo bisogno. Questo risultato ci potrebbe portare a scegliere il valore minimo per il prescaler al fine di ottenere una qualità altissima dell'audio. Purtroppo non è tutt'oro quel che luccica perchè dobbiamo considerare che aumentando la frequenza cresce il "rumore" nei valori letti sul pin e quindi invece di migliorare la qualità del suono la peggioreremmo. In ogni caso a noi va più che bene un prescaler uguale a 32 che ci da una qualità molto vicina a quella dei CD audio.
+Osserviamo che riusciamo ad ottenere frequenze molto alte, anche molto più di quello di cui abbiamo bisogno. Questo risultato ci potrebbe portare a scegliere il valore minimo per il prescaler al fine di ottenere una qualità altissima dell'audio. Purtroppo non è tutt'oro quel che luccica perché dobbiamo considerare che aumentando la frequenza cresce il "rumore" nei valori letti sul pin e quindi invece di migliorare la qualità del suono la peggioreremmo. In ogni caso a noi va più che bene un prescaler uguale a 32 che ci da una qualità molto vicina a quella dei CD audio.
 
 Ora dobbiamo però tener conto di un altro fattore che potrebbe limitare la nostra velocità di campionamento: la comunicazione seriale.
 Come detto in precedenza i dati raccolti con Arduino devono essere spediti al computer tramite il cavo seriale, quindi se non riusciamo a mandare in tempo tutti i dati che leggiamo siamo comunque costretti ad abbassare la frequenza dell'ADC.
@@ -322,11 +319,11 @@ La macro \texttt{ISR} marca la funzione come interrupt handler, in questo caso (
 
 Nella funzione noi leggiamo i valori che sono stati campionati dai registri \texttt{ADCL} e \texttt{ADCH}, li inseriamo nel pacchetto e poi li scriviamo sulla seriale. Assumendo che l'operazione più costosa sia la scrittura sulla porta seriale calcoliamo quanto costa scrivere un pacchetto di 4 byte e consideriamo tale valore come lower bound per il costo del nostro interrupt handler.
 
-Il costo per scrivere un pacchetto di 4 byte, che avevamo trovato nel paragrafo precedente, è in media \SI{76}{\micro\second}. Riguardando la tabella nella pagina precedente leggiamo che campionando a \SI{19.23}{\kilo\hertz} l'ADC legge un nuovo sample ogni \SI{52}{\micro\second}. Impostando perciò un prescaler minore di 128 l'ADC non riuscirà a leggere ogni volta che gli tocca perchè, ricordando che l'interrupt handler esegue in sezione critica, l'handler di gestione dura di più del tempo di attesa tra la lettura di un campione e l'altro ed accadrà che a volte questo metterà in attesa l'ADC che vuole leggere un nuovo sample.
+Il costo per scrivere un pacchetto di 4 byte, che avevamo trovato nel paragrafo precedente, è in media \SI{76}{\micro\second}. Riguardando la tabella nella pagina precedente leggiamo che campionando a \SI{19.23}{\kilo\hertz} l'ADC legge un nuovo sample ogni \SI{52}{\micro\second}. Impostando perciò un prescaler minore di 128 l'ADC non riuscirà a leggere ogni volta che gli tocca perché, ricordando che l'interrupt handler esegue in sezione critica, l'handler di gestione dura di più del tempo di attesa tra la lettura di un campione e l'altro ed accadrà che a volte questo metterà in attesa l'ADC che vuole leggere un nuovo sample.
 Questo risultato stronca le nostre speranze sul fatto di ottenere una qualità audio vicina a quella dei CD e ci dice che possiamo ottenere una frequenza che si aggira tra i \SI{19.23}{\kilo\hertz} e i \SI{9.61}{\kilo\hertz}. Empiricamente abbiamo trovato \SI{14.1}{\kilo\hertz} circa.
 
 \vspace{0.2in}
-Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio nel pacchetto dei valori letti e scrivere sulla seriale nel loop principale. Questo sicuramente permetterà all'ADC di campionare alla frequenza con cui dovrebbe però noi comunque non riusciremmo a mandare sulla seriale tutti i sample letti, per via del tempo necesario alla scrittura. Anzi peggioreremmo la situazione perchè dato che l'interrupt handler ha priorità maggiore rispetto a quella del loop, prenderà sempre il controllo mentre il loop sta eseguendo facendo satare molti campioni. Facendo una prova abbiamo rilevato una frequenza di campionamento di circa \SI{9}{\kilo\hertz}.
+Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio nel pacchetto dei valori letti e scrivere sulla seriale nel loop principale. Questo sicuramente permetterà all'ADC di campionare alla frequenza con cui dovrebbe però noi comunque non riusciremmo a mandare sulla seriale tutti i sample letti, per via del tempo necessario alla scrittura. Anzi peggioreremmo la situazione perché dato che l'interrupt handler ha priorità maggiore rispetto a quella del loop, prenderà sempre il controllo mentre il loop sta eseguendo facendo saltare molti campioni. Facendo una prova abbiamo rilevato una frequenza di campionamento di circa \SI{9}{\kilo\hertz}.
 
 \begin{thebibliography}{9}
 
