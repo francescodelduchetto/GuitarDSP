@@ -164,7 +164,6 @@ Ricordando che i pin analogici di Arduino permettono di leggere valori di tensio
 Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad un pin di Arduino ma dobbiamo progettare e costruire un circuito che trasformi il segnale originario in un segnale adeguato per le esigenze del microcontrollore.
 Il circuito deve quindi traslare il segnale nel range 0-5V, centrandolo in 2.5V, e amplificarlo di un fattore circa uguale a 10.
 
-\newpage
 Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://www.ni.com/multisim}} prima di cablarlo sulla scheda di prototipazione:
 
 \begin{center}
@@ -178,7 +177,6 @@ Le resistenze $R_1$ e $R_2$ quindi servono per regolare il fattore di amplificaz
 I condensatori sono stati usati per tagliare via le frequenze di rumore dal segnale di input.
 
 \vspace{0.2in}
-\newpage
 Nel grafico seguente vediamo in rosso il segnale $V_1$ di input e in blu il segnale di output:
 \vspace{0.1in}
 

@@ -13,7 +13,7 @@ public class AudioDemultiplexer extends Thread {
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
 
-	private int debug = 1;
+	private int debug = 0;
 	
 	private Model model;
 
@@ -24,8 +24,6 @@ public class AudioDemultiplexer extends Thread {
 	private SerialPort serialPort;
 
 	private InputStream input;
-//	private BufferedReader input;
-	
 
 	short[] buffer = new short[] {0, 0, 0};
 
@@ -45,7 +43,6 @@ public class AudioDemultiplexer extends Thread {
 
 			// open the stream
 			input = serialPort.getInputStream();
-//			input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 			
 		} catch (Exception e) {
 			System.err.println(e.toString());
