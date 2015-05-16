@@ -4,13 +4,13 @@ void setupADC() {
 	ADCSRA = 0;
 	ADCSRB = 0;
 
-	ADMUX |= (1 << REFS0); 	// set reference voltage
-	ADMUX |= (1 << ADLAR); 	// left align the ADC value
+	ADMUX |= (1 << REFS0);  // set reference voltage
+	ADMUX |= (1 << ADLAR);  // left align the ADC value
 
-	ADCSRA |= (1 << ADPS0) | (1 << ADPS2); // set ADC clock with 32 prescaler
-	ADCSRA |= (1 << ADATE); // enabble auto trigger
+	ADCSRA |= (1 << ADPS0) | (1 << ADPS2);  // set ADC clock with 32 prescaler
+	ADCSRA |= (1 << ADATE);  // enable auto trigger
 	ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
 	ADCSRA |= (1 << ADEN);  // enable ADC
-	ADCSRA |= (1 << ADSC);  // start ADC 
-	sei(); 
+	ADCSRA |= (1 << ADSC);  // start ADC
+	sei();
 }
