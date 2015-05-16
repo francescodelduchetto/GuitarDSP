@@ -112,9 +112,19 @@ Come accennato nella sezione precedente, il nostro sistema ha il requisito del n
 Dal momento che Arduino risulta essere il collo di bottiglia del sistema, a causa del processore a $16$ MHz, è opportuno scegliere la frequenza più alta alla quale il \textit{producer} è in grado di spedire i dati.
 
 \subsection{Campionamento dell'audio}
-La lettura dell'audio in input è una funzione cardine del nostro sistema perciò abbiamo speso molto tempo nel cercare il modo migliore per campionare l'audio (per approfondimenti guardare nella sezione \textbf{Test effettuati e discussione}). Visto che la lettura dell'audio è una funzione che deve essere eseguita continuamente, e non ad esempio a fronte di uno specifico evento, ed il più velocemente possibile, abbiamo concluso che la soluzione migliore è quella di usare il convertitore analogico digitale montato sulla scheda. Con l'ADC
+La lettura dell'audio in input è una funzione cardine del nostro sistema perciò abbiamo speso molto tempo nel cercare il modo migliore per campionare l'audio (per approfondimenti guardare nella sezione \textbf{Test effettuati e discussione}).
+
+La frequenza di campionamento è il numero di campioni prelevati al secondo e si misura in Hertz (\si{\hertz}).
+La scelta della frequenza di campionamento del segnale audio è un fattore molto importante nella nostra applicazione per ottenere in uscita una buona qualità audio. Considerando che nei CD audio è uguale a \SI{44.1}{\kilo\hertz} mentre nelle linee telefoniche è \SI{8}{\kilo\hertz}, possiamo dire che per noi una frequenza accettabile si aggira tra questi due, avvicinandosi il più possibile alla prima.
+
+Inizialmente abbiamo provato ad implementare il campionamento audio nel modo più immediato, cioè usando la funzione \texttt{analogRead} fornita dalle librerie di Arduino.
+Abbiamo subito notato che facendo in questo modo dovevamo impostare, quando richiedevamo la linea di output sul PC, un frame rate di circa \SI{5100}{\hertz} per sentire in uscita un suono coerente con quello suonato. Questa frequenza è davvero molto bassa quindi era necessario prendere un'altra direzione.
+
+Abbiamo perciò deciso di utilizzare il convertitore digitale analogico (ADC) presente su Arduino. Possiamo impostare l'ADC dicendogli di leggere uno specifico pin analogico (nel nostro caso A0) con una determinata frequenza. Questo è il modo più adatto al nostro scopo dato che dobbiamo leggere continuamente i campioni dal pin A0, non a fronte di uno specifico evento, e nel modo più veloce possibile.
+Come spiegato più avanti nella sezione di test, siamo comunque limitati nella frequenza di campionamento per via del tempo di scrittura del valore sulla seriale e del rumore sul che si verifica quando leggiamo velocemente. La velocità massima che abbiamo ottenuto si aggira intorno ai \SI{14}{\kilo\hertz}, ma comunque non siamo riusciti ad ottenere un suono del tutto primo di interferenze.
 
 \subsection{Applicazione degli effetti e riproduzione dell'audio}
+La parte di elaborazione del suono e riproduzione è stata demandata ad un computer, che a differenza della scheda Arudino Uno riesce a gestire questi compiti più onerosi computazionalmente. L'applicazione originale GuitarDSP è stato modificato affinchè fosse in grado di leggere uno strem di byte dalla porta seriale. In oltre è stata implementata la possibilità di spegnimento/accensione degli effetti selezionati utilizzando i pulsanti presenti sulla chitarra. La parte di riproduzione del segnale audio è stata lasciata invariata a parte la scelta della frequenza con cui aprire la linea audio, la quale dovrebbe essere uguale alla frequenza di campionamento.
 
 \subsection{Modellazione dei pulsanti}
 L'idea iniziale per la realizzazione della pulsantiera era quella di registrare ciascun pin digitale come interrupt attraverso la chiamata \href{http://www.arduino.cc/en/Reference/AttachInterrupt}{\texttt{attachInterrupt()}}. Questo sarebbe stato possibile se avessimo utilizzato \emph{Arduino Due}, che permette di associare un interrupt a tutti i pin; avendo invece un microcontrollore grossomodo equivalente ad Arduino Uno, avevamo la possibilità di usare la funzione \texttt{attachInterrupt()} su al più due pin.
@@ -123,21 +133,21 @@ A causa di questa limitazione, abbiamo dovuto trovare una soluzione diversa. È 
 
 \section{Struttura, comportamento ed interazione delle varie parti}
 
-\begin{itemize}
-    \item Sottosistema \textsc{Chitarra-Pulsantiera-Arduino}:
-    \begin{enumerate}
-        \item Lettura continua dell'audio analogico e campionamento, evitando il più possibile di perdere qualità.
-        \item Rilevazione della pressione (asincrona) dei pulsanti.
-        \item Spedizione di tutti i dati raccolti tramite l'uscita seriale in modo che arrivino integri al destinatario.
-    \end{enumerate}
-    \item Sottosistema \textsc{Computer}:
-    \begin{enumerate}
-        \item Lettura dei dati in arrivo sulla porta USB ``distinguendo'' i dati audio da quelli relativi ai pulsanti.
-        \item Elaborazione del suono e applicazione gli effetti.
-        \item Modifica della pila di effetti da applicare, in base ai pulsanti premuti.
-        \item Invio del suono elaborato sulla linea di output.
-    \end{enumerate}
-\end{itemize}
+%~ \begin{itemize}
+    %~ \item Sottosistema \textsc{Chitarra-Pulsantiera-Arduino}:
+    %~ \begin{enumerate}
+        %~ \item Lettura continua dell'audio analogico e campionamento, evitando il più possibile di perdere qualità.
+        %~ \item Rilevazione della pressione (asincrona) dei pulsanti.
+        %~ \item Spedizione di tutti i dati raccolti tramite l'uscita seriale in modo che arrivino integri al destinatario.
+    %~ \end{enumerate}
+    %~ \item Sottosistema \textsc{Computer}:
+    %~ \begin{enumerate}
+        %~ \item Lettura dei dati in arrivo sulla porta USB ``distinguendo'' i dati audio da quelli relativi ai pulsanti.
+        %~ \item Elaborazione del suono e applicazione gli effetti.
+        %~ \item Modifica della pila di effetti da applicare, in base ai pulsanti premuti.
+        %~ \item Invio del suono elaborato sulla linea di output.
+    %~ \end{enumerate}
+%~ \end{itemize}
 
 \subsection{Circuito elettronico}
 Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra 0V e 5V, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
@@ -172,11 +182,7 @@ Nel grafico seguente vediamo in rosso il segnale \texttt{V1} di input e in blu i
 \includegraphics[width=0.9\textwidth]{screen2.png}
 \end{center}
 
-Descrizione della struttura/comportamento/interazione delle varie parti.
 
-Utilizzo linguaggi di modellazione appropriati (UML…)
-
-\section{Test effettuati e discussione}
 
 \subsection{Comunicazione Arduino - PC}
 La comunicazione tra Arduino e il computer è stato un punto chiave del nostro progetto perchè come vedremo la scelta del protocollo di comunicazione influenza molto le performance del sistema.
@@ -187,7 +193,7 @@ I dati che il microcontrollore deve mandare al computer sono:
     \item notifica della pressione di un pulsante.
 \end{enumerate}
 
-\subsubsection{Comunicazione senza overhead}
+\subsubsection{Comunicazione senza sincronizzazione}
 Il primo testo effettuato e stato quello di non utilizzare nessun protocollo specifico, o meglio mandare i campioni appena raccolti senza aggiungere alcun overhead ai dati. Chiaramente questo approccio è quello che permette la maggior velocità di comunicazione visto che mandiamo solamente i dati utili senza aggiungere nessuna informazione non necessaria.
 
 Naturalmente per scrivere sulla seriale utilizzeremo la funzione \texttt{Serial.write} la quale a differenza di \texttt{Serial.print} non codifica il valore in ASCII, cosa che comporterebbe la spedizione di un pacchetto più grande. La \texttt{Serial.write} può scrivere come minimo valori di byte quindi per scrivere il sample, grande 10 bit, abbiamo bisogno di scrivere due byte. Per i pulsanti invece, che sono 8, ci basta un byte. In totale dobbiamo scirvere 3 byte.
@@ -200,7 +206,7 @@ Questa soluzione innanzitutto lascia inutilizzato l'ultimo byte per quasi tutta 
 
 Per avere un sistema fault-tolerant siamo perciò obbligati ad inserire delle informazioni di sincronizzazione aggiuntive al nostro pacchetto.
 
-\subsubsection{Comunicazione con overhead}
+\subsubsection{Comunicazione con sincronizzazione}
 Iniziamo con l'analizzare il contenuto dei byte nel nostro pacchetto:
 
 \begin{table}[h]
@@ -240,17 +246,12 @@ Quindi inseriamo, in testa al pacchetto originario, due byte di sincronizzazione
 
 Ora da PC siamo sicuri che appena leggiamo due volte 255 seguito da un altro valore, diverso da 255, quest'ultimo è il primo byte del nostro pacchetto originario.
 
-\subsection{Frequenza di campionamento}
-La frequenza di campionamento è il numero di campioni prelevati al secondo e si misura in Hertz (\si{\hertz}).
-La scelta della frequenza di campionamento del segnale audio è un fattore molto importante nella nostra applicazione per ottenere in uscita una buona qualità audio. Considerando che nei CD audio è uguale a \SI{44.1}{\kilo\hertz} mentre nelle linee telefoniche è \SI{8}{\kilo\hertz}, possiamo dire che per noi una frequenza accettabile si aggira tra questi due, avvicinandosi il più possibile alla prima.
+\section{Test effettuati, dati e discussione}
 
+\subsection{Frequenza campionamento}
 Notare che nel nostro progetto il frame rate che utilizziamo per aprire una linea audio di output è la stessa frequenza di campionamento con cui prendiamo il segnale della chitarra con Arduino, se così non fosse il suono che ne verrebbe fuori, senza applicare nessun effetto, non sarebbe uguale a quello suonato. Per questo motivo è stato importante per noi riuscire a fare una stima abbastanza precisa della frequenza con cui prendiamo l'audio.
 
-Cercheremo ora di stimare che frequenze riusciamo ad ottenere utilizzando Arduino.
-
-\subsubsection{analogRead}
-Inizialmente abbiamo provato ad implementare il campionamento audio nel modo più immediato, cioè usando la funzione \texttt{analogRead} fornita dalle librerie di Arduino.
-Abbiamo subito notato che facendo in questo modo dovevamo impostare, quando richiedevamo la linea di output sul PC, un frame rate di circa \SI{5100}{\hertz} per sentire in uscita un suono coerente con quello suonato.
+\subsubsection{Test con analogRead}
 
 Facendo un po' di prove abbiamo visto che per leggere un campione, utilizzando \texttt{analogRead}, impieghiamo circa \SI{108}{\micro\second} mentre servono \SI{76}{\micro\second} per scrivere sulla linea seriale un pacchetto di \SI{32}{\bit}.
 
@@ -265,7 +266,7 @@ Il processore di Arduino lavora ad una frequenza di \SI{16}{\mega\hertz} (ovvero
 Questo vuol dire che la frequenza massima che possiamo ottenere in questo modo è $\num[quotient-mode = fraction]{16e6 / 2944} = \SI{5434}{\hertz}$, che coincide circa con il valore del frame rate che avevamo trovato empiricamente.
 Chiaramente \SI{5}{\kilo\hertz} non sono accettabili per i nostri requisiti, essendo addirittura peggiore della qualità audio telefonica, quindi dobbiamo prendere un'altra strada.
 
-\subsubsection{Analog Digital Converter}
+\subsubsection{Test con l'ADC}
 Con Arduino abbiamo la possibilità di sfruttare il convertitore analogico-digitale integrato nella scheda, controllandolo a basso livello.
 
 Il seguente codice attiva l'ADC:
