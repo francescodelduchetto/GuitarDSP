@@ -1,7 +1,9 @@
 package view;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -84,7 +86,9 @@ public class GraphView extends JFrame {
 		@Override
 		public void paintComponent(final Graphics g) {
 			super.paintComponent(g);
-			g.setColor(Color.RED);
+			Graphics2D  g2 = (Graphics2D) g;
+			g2.setColor(Color.RED);
+			g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			if (buffer != null) {
 				double ax = (double) buffer.length / this.getSize().width;
 				double ay = (Short.MAX_VALUE - Short.MIN_VALUE)
@@ -98,7 +102,8 @@ public class GraphView extends JFrame {
 					y2 += this.getSize().height / 2 - 1;
 					y1 = (short) (this.getSize().height - y1);
 					y2 = (short) (this.getSize().height - y2);
-					g.drawLine(x1, y1, x2, y2);
+					
+					g2.drawLine(x1, y1, x2, y2);
 				}
 			}
 
