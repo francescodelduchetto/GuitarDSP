@@ -149,6 +149,7 @@ L'idea iniziale per la realizzazione della pulsantiera era quella di registrare 
 A causa di questa limitazione, abbiamo dovuto trovare una soluzione diversa. È infatti possibile utilizzare interrupt per il cambio di stato dei pin (su tutti i pin) attraverso le \emph{Pin Change Interrupt Requests}\cite{allinterrupts}.
 
 \section{Struttura, comportamento ed interazione delle varie parti}
+Per strutturare il nostro sistema abbiamo preso molte informazioni utili dall'instructable \emph{Arduino Audio Input}\cite{arduinoinput}. Nello specifico abbiamo riutilizzato il circuito consigliato dall'autore modificandolo in modo che usi l'alimentazione fornita da Ardunio e non quella di due batterie esterne da \SI{9}{\volt}. In questo modo il circuito, che deve essere montato sulla chitarra, risulta essere più compatto e non dobbiamo preoccuparci di cambiare le batterie quando si scaricano. In oltre dal suddetto instructable abbiamo preso diversi spunti per ottimizzare il campionamento dell'audio.
 
 \subsection{Diagrammi degli stati}
 \noindent
@@ -334,7 +335,10 @@ Si potrebbe pensare di lasciare nell'interrupt handler solamente il salvataggio 
   2014.
 
 \bibitem{allinterrupts}
-	\url{http://playground.arduino.cc/Main/PinChangeInterrupt}.
+	\url{http://playground.arduino.cc/Main/PinChangeInterrupt},
+	
+\bibitem{arduinoinput}
+	\url{http://www.instructables.com/id/Arduino-Audio-Input}.
 
 \end{thebibliography}
 
