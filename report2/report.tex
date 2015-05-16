@@ -145,7 +145,7 @@ Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad
 Il circuito deve quindi traslare il segnale nel range 0-5V, centrandolo in 2.5V, e amplificarlo di un fattore circa uguale a 10.
 
 \newpage
-Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://www.ni.com/multisim/i/}} prima di cablarlo sulla scheda di prototipazione:
+Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://www.ni.com/multisim}} prima di cablarlo sulla scheda di prototipazione:
 
 \begin{center}
 \includegraphics[width=0.9\textwidth]{screen.png}
@@ -153,7 +153,7 @@ Questo è il circuito che abbiamo progettato su Multisim\footnote{\url{http://ww
 
 \texttt{V1} è un oscilloscopio che simula il suono proveniente dalla chitarra.
 \texttt{U3A} è un amplificatore operazionale (modello TLC2727CP) collegato in configurazione invertente la cui tensione in uscita sarà: $$Vout = V2 - \frac{R2}{R1} \cdot V1 $$
- 
+
 Le resistenze \texttt{R1} e \texttt{R2} quindi servono per regolare il fattore di amplificazione del segnale d'ingresso. Le resistenze \texttt{R3} ed \texttt{R4} sono usate invece per fare un partitore di tensione ed ottenere i 2.5V per spostare il segnale nel range 0-5V.
 
 I condensatori sono stati usati per tagliare via le frequenze di rumore dal segnale di input.
