@@ -158,14 +158,21 @@ Sottosistema \textsc{Chitarra-Pulsantiera-Arduino}:
 
 \includegraphics[width=\textwidth]{stati1.pdf}
 
+\noindent
+Sottosistema \textsc{Computer}:
+
+\vspace{3mm}
+
+\includegraphics[width=\textwidth]{stati2.pdf}
+
 \subsection{Struttura codice Arduino}
 La parte di codice embedded sul microcontrollore non è stata strutturata in classi o seguento specifici pattern perchè abbiamo la necessità che essa vada il più veloce possibile. Il loop principale del programma è vuoto e l'esecuzione di codice è scatenato esclusivamente dagli interrupt. Nello specifico abbiamo un interrupt che viene chiamato regolarmente dall'ADC appena è disponibile un nuovo campione da leggere ed altri due interrupt che sono evocati a fronte della pressione di un pulsante sulla scheda. La struttura, della parte su Arduino, quindi può essere vista come quella di un sistema con un modello ad eventi, in cui gli eventi sono gestiti dagli appositi interrupt handler che quindi sono le reazioni agli specifici eventi.
 
 \subsection{Circuito elettronico}
-Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra 0V e 5V, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
+Ricordando che i pin analogici di Arduino permettono di leggere valori di tensione compresi tra \SI{0}{\volt} e \SI{5}{\volt}, per poter campionare adeguatamente il segnale audio proveniente dalla chitarra abbiamo dovuto gestire due principali problematiche:
 \begin{itemize}
-    \item Nei segnali audio la tensione assume valori sia positivi che negativi;
-    \item il segnale in uscita dalla chitarra non essendo amplificato assume valori di picco dell'ordine dei 200mV, rendendo difficile ricostruire con precisione il segnale.
+    \item Nei segnali audio la tensione assume valori sia positivi che negativi.
+    \item Il segnale in uscita dalla chitarra non essendo amplificato assume valori di picco dell'ordine dei \SI{200}{\milli\volt}, rendendo difficile ricostruire con precisione il segnale.
 \end{itemize}
 
 Per questi motivi non possiamo collegare direttamente l'uscita della chitarra ad un pin di Arduino ma dobbiamo progettare e costruire un circuito che trasformi il segnale originario in un segnale adeguato per le esigenze del microcontrollore.
