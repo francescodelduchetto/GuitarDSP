@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-uint8_t values[4] = {255, 255, 1, 0};
-uint8_t buttonPressed;
+volatile uint8_t values[4] = {255, 255, 1, 0};
+volatile uint8_t buttonPressed;
 
 void setupADC() {
 	cli();
