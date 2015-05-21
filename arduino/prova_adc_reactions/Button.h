@@ -5,7 +5,7 @@
 
 class Button : public EventSource {
 public:
-    virtual bool isPressed();
+    bool isPressed() ;
 };
 
 #endif

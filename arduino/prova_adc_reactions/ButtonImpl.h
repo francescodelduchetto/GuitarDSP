@@ -9,7 +9,7 @@
 class ButtonImpl: public Button {
 public:
     ButtonImpl(int pin);
-    bool isPressed();
+    virtual bool isPressed();
     uint8_t getPin();
 
 private:

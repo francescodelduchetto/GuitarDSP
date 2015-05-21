@@ -24,4 +24,5 @@ void PacketSender::setSample(uint8_t highByte, uint8_t lowByte) {
 
 void PacketSender::sendPacket() {
 	Serial.write(this->packet, 4);
+	this->button = 0;
 }

@@ -17,7 +17,7 @@ class Event {
 		Event(int type, EventSource* source);
 		int getType();
 		EventSource* getSource();
-		virtual ~Event() {};
+		//~ virtual ~Event() {};
 		
 	private :
 	

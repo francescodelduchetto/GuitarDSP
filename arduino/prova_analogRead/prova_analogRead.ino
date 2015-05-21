@@ -9,7 +9,7 @@ void setup() {
 
 void loop() {
 	uint16_t value = analogRead(A0);
-	values[2] = (value & 0x00000011) << 6;
-	values[3] = (value >> 2) & 255;
+	values[2] = (value >> 2) & 255;
+	values[3] = (value & 0x00000011) << 6;
 	Serial.write(values, 4);
 } 
