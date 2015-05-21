@@ -29,7 +29,7 @@ ISR (PCINT0_vect) {
 
 void registerNewButton(ButtonImpl* button) {
 	if (nButtons < MAX_BUTTONS) {
-		buttons[nButtons] = button;
+		buttons[nButtons++] = button;
 	}
 	cli();
     *digitalPinToPCMSK(button->getPin()) |= bit (digitalPinToPCMSKbit(button->getPin()));  // enable pin
@@ -38,18 +38,18 @@ void registerNewButton(ButtonImpl* button) {
     sei();
 }
 
-ButtonImpl::ButtonImpl(int pin) {
-	this->ticks = 0;
+ButtonImpl::ButtonImpl(uint8_t pin) {
+	this->previousTimestamp = millis();
     this->pin = pin;
-    pinMode(pin, INPUT);
-    digitalWrite(pin, HIGH);
+    pinMode(this->pin, INPUT);
+    digitalWrite(this->pin, HIGH);
     registerNewButton(this);
 }
 
 bool ButtonImpl::isPressed() {
-	this->ticks++;
-    if (this->ticks > TOLERANCE) {
-		this->ticks = 0;
+	long timestamp = millis();
+    if (timestamp > TOLERANCE + this->previousTimestamp && digitalRead(this->pin) == LOW) {
+		this->previousTimestamp = timestamp;
 		return true;
 	} else {
 		return false;
